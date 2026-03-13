@@ -1,0 +1,11 @@
+{
+  "name": "fpa-automation-planner",
+  "version": "1.0.0",
+  "description": "FP&A Automation Project Planner for Agencies & Publishers",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
