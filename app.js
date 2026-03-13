@@ -8,7 +8,9 @@ let state = {
     teamSize: 'medium',
     duration: 9,
     deliveryModel: 'onshore',
-    licenseModel: 'saas'
+    licenseModel: 'saas',
+    generatedFrom: null,
+    expandedModules: new Set()
 };
 
 // ----------------------------------------------------------
@@ -19,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setTeamSize('medium');
     applyPreset('standard');
     initScrollEffects();
+    initKeyboardShortcuts();
 });
 
 // ----------------------------------------------------------
@@ -26,13 +29,14 @@ document.addEventListener('DOMContentLoaded', () => {
 // ----------------------------------------------------------
 function setIndustry(industry) {
     state.industry = industry;
+    state.generatedFrom = null;
+    state.expandedModules = new Set();
+    hideGeneratedFromBanner();
 
-    // Toggle buttons
     document.querySelectorAll('.toggle-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.industry === industry);
     });
 
-    // Hero
     document.getElementById('heroIndustryText').textContent = DATA.context[industry].heroText;
     document.getElementById('heroSubtitle').textContent = DATA.context[industry].heroSubtitle;
     document.getElementById('useCaseIndustryLabel').textContent = industry === 'agency' ? 'Agencies' : 'Publishers';
@@ -64,13 +68,13 @@ function renderContextBanner() {
 }
 
 // ----------------------------------------------------------
-// USE CASES
+// USE CASES (Clickable → auto-configure project)
 // ----------------------------------------------------------
 function renderUseCases() {
     const cases = DATA.useCases[state.industry];
     const grid = document.getElementById('useCaseGrid');
     grid.innerHTML = cases.map((uc, i) => `
-        <div class="use-case-card" style="animation-delay: ${i * 0.05}s">
+        <div class="use-case-card" style="animation-delay: ${i * 0.05}s" onclick="selectUseCaseProject(${i})">
             <div class="uc-header">
                 <span class="uc-icon">${uc.icon}</span>
                 <span class="uc-complexity complexity-${uc.complexity}">${uc.complexity}</span>
@@ -92,27 +96,63 @@ function renderUseCases() {
     `).join('');
 }
 
+function selectUseCaseProject(idx) {
+    const uc = DATA.useCases[state.industry][idx];
+    if (!uc || !uc.projectPlan) return;
+
+    const plan = uc.projectPlan;
+    state.selectedModules = new Set(plan.moduleIndices);
+    const teamSize = plan.recommendedTeamSize || plan.teamSize;
+    const duration = plan.recommendedDuration || plan.duration;
+    state.teamSize = teamSize;
+    state.duration = duration;
+    state.generatedFrom = uc.title;
+
+    document.getElementById('durationSlider').value = duration;
+    document.getElementById('durationDisplay').textContent = `${duration} months`;
+
+    setTeamSize(teamSize);
+    renderScopeModules();
+    updateCosts();
+    renderExportSummary();
+    showGeneratedFromBanner(uc.title);
+
+    document.getElementById('scope').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function showGeneratedFromBanner(name) {
+    const banner = document.getElementById('generatedFromBanner');
+    document.getElementById('generatedFromName').textContent = name;
+    banner.style.display = 'flex';
+}
+
+function hideGeneratedFromBanner() {
+    document.getElementById('generatedFromBanner').style.display = 'none';
+}
+
+function clearGeneratedFrom() {
+    state.generatedFrom = null;
+    hideGeneratedFromBanner();
+}
+
 // ----------------------------------------------------------
-// ARCHITECTURE
+// ARCHITECTURE (Clickable → detail modal)
 // ----------------------------------------------------------
 function renderArchitecture() {
     const arch = DATA.architecture[state.industry];
+    const layerLabels = { sources: 'Data Sources', platform: 'Data Platform', apps: 'Application Layer', outputs: 'Outputs' };
 
     ['sources', 'platform', 'apps', 'outputs'].forEach(layer => {
-        const container = document.getElementById(`arch${layer.charAt(0).toUpperCase() + layer.slice(1)}`);
-        const capitalizedId = layer === 'apps' ? 'archApps' :
-                              layer === 'sources' ? 'archSources' :
-                              layer === 'platform' ? 'archPlatform' : 'archOutputs';
+        const capitalizedId = 'arch' + layer.charAt(0).toUpperCase() + layer.slice(1);
         const el = document.getElementById(capitalizedId);
-        el.innerHTML = arch[layer].map(item => `
-            <div class="arch-item">
+        el.innerHTML = arch[layer].map((item, idx) => `
+            <div class="arch-item" onclick="openArchDetail('${layer}', ${idx})">
                 <span class="arch-item-name">${item.name}</span>
                 <span class="arch-item-sub">${item.sub}</span>
             </div>
         `).join('');
     });
 
-    // Tech stack
     const techGrid = document.getElementById('techGrid');
     techGrid.innerHTML = DATA.techStack.map(tech => `
         <div class="tech-card">
@@ -123,13 +163,44 @@ function renderArchitecture() {
     `).join('');
 }
 
+function openArchDetail(layer, idx) {
+    const arch = DATA.architecture[state.industry];
+    const item = arch[layer][idx];
+    if (!item) return;
+
+    const layerLabels = { sources: 'Data Sources', platform: 'Data Platform', apps: 'Application Layer', outputs: 'Outputs' };
+
+    document.getElementById('archModalLayer').textContent = layerLabels[layer];
+    document.getElementById('archModalTitle').textContent = item.name;
+    document.getElementById('archModalSub').textContent = item.sub;
+    document.getElementById('archModalTech').textContent = item.techDescription || 'Technical description not available.';
+    document.getElementById('archModalBusiness').textContent = item.businessDescription || 'Business description not available.';
+    document.getElementById('archModalCurrentName').textContent = item.name;
+
+    const upstream = item.connections?.upstream || [];
+    const downstream = item.connections?.downstream || [];
+
+    document.getElementById('archModalUpstream').innerHTML = upstream.length > 0
+        ? upstream.map(u => `<span class="conn-tag">${u}</span>`).join('')
+        : '<span class="conn-empty">No upstream sources</span>';
+
+    document.getElementById('archModalDownstream').innerHTML = downstream.length > 0
+        ? downstream.map(d => `<span class="conn-tag">${d}</span>`).join('')
+        : '<span class="conn-empty">End consumer</span>';
+
+    document.getElementById('archDetailModal').classList.add('active');
+}
+
+function closeArchDetail() {
+    document.getElementById('archDetailModal').classList.remove('active');
+}
+
 // ----------------------------------------------------------
-// SCOPE MODULES
+// SCOPE MODULES (with detail expansion)
 // ----------------------------------------------------------
 function renderScopeModules() {
     const modules = DATA.scopeModules[state.industry];
     const container = document.getElementById('scopeModules');
-
     const categories = { core: 'Core Modules', analytics: 'Analytics Modules', advanced: 'Advanced Modules' };
 
     let html = '';
@@ -138,19 +209,24 @@ function renderScopeModules() {
         html += `<div class="module-category">
             <h3 class="module-cat-title">${label}</h3>
             <div class="module-list">
-                ${catModules.map((m, i) => {
+                ${catModules.map(m => {
                     const globalIdx = modules.indexOf(m);
                     const isSelected = state.selectedModules.has(globalIdx);
-                    return `<div class="module-card ${isSelected ? 'selected' : ''}" onclick="toggleModule(${globalIdx})">
+                    const isExpanded = state.expandedModules.has(globalIdx);
+                    return `<div class="module-card ${isSelected ? 'selected' : ''} ${isExpanded ? 'detail-expanded' : ''}" onclick="toggleModule(${globalIdx})">
                         <div class="module-check">${isSelected ? '✓' : ''}</div>
                         <div class="module-info">
-                            <span class="module-name">${m.name}</span>
+                            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                                <span class="module-name">${m.name}</span>
+                                <button class="module-detail-toggle" onclick="toggleModuleDetail(${globalIdx}, event)" title="View details">ℹ</button>
+                            </div>
                             <span class="module-desc">${m.description}</span>
                             <div class="module-meta">
                                 <span class="meta-tag">Effort: ${m.effort} weeks</span>
                                 <span class="meta-tag">Integrations: ${m.integrations}</span>
                                 <span class="meta-tag phase-tag">Phase ${m.phase}</span>
                             </div>
+                            ${renderModuleDetailPanel(m, globalIdx)}
                         </div>
                     </div>`;
                 }).join('')}
@@ -160,6 +236,48 @@ function renderScopeModules() {
 
     container.innerHTML = html;
     updateScopeSummary();
+}
+
+function renderModuleDetailPanel(m, idx) {
+    const deps = m.dependencies && m.dependencies.length > 0
+        ? m.dependencies.map(depId => {
+            const depMod = DATA.scopeModules[state.industry].find(mod => mod.id === depId);
+            return depMod ? depMod.name : depId;
+        })
+        : ['None — standalone module'];
+
+    return `<div class="module-detail-panel">
+        ${m.deliverables ? `<div class="detail-section">
+            <div class="detail-section-title dt-deliverables">Key Deliverables</div>
+            <ul class="detail-list">${m.deliverables.map(d => `<li>${d}</li>`).join('')}</ul>
+        </div>` : ''}
+        ${m.requiredSkills ? `<div class="detail-section">
+            <div class="detail-section-title dt-skills">Required Skills</div>
+            <div class="detail-tags">${m.requiredSkills.map(s => `<span class="detail-tag">${s}</span>`).join('')}</div>
+        </div>` : ''}
+        ${m.dependencies ? `<div class="detail-section">
+            <div class="detail-section-title dt-deps">Dependencies</div>
+            <div class="detail-tags">${deps.map(d => `<span class="detail-tag">${d}</span>`).join('')}</div>
+        </div>` : ''}
+        ${m.successCriteria ? `<div class="detail-section">
+            <div class="detail-section-title dt-success">Success Criteria</div>
+            <ul class="detail-list">${m.successCriteria.map(s => `<li>${s}</li>`).join('')}</ul>
+        </div>` : ''}
+        ${m.riskFactors ? `<div class="detail-section">
+            <div class="detail-section-title dt-risks">Risk Factors</div>
+            <ul class="detail-list">${m.riskFactors.map(r => `<li>${r}</li>`).join('')}</ul>
+        </div>` : ''}
+    </div>`;
+}
+
+function toggleModuleDetail(idx, event) {
+    event.stopPropagation();
+    if (state.expandedModules.has(idx)) {
+        state.expandedModules.delete(idx);
+    } else {
+        state.expandedModules.add(idx);
+    }
+    renderScopeModules();
 }
 
 function toggleModule(idx) {
@@ -206,9 +324,8 @@ function applyPreset(preset) {
     updateCosts();
     renderExportSummary();
 
-    // Highlight active preset
     document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
-    event.target.classList.add('active');
+    if (event && event.target) event.target.classList.add('active');
 }
 
 // ----------------------------------------------------------
@@ -227,20 +344,8 @@ function setTeamSize(size) {
 function renderTeamRoster() {
     const roles = DATA.teamRoles[state.teamSize];
     const roster = document.getElementById('teamRoster');
-
-    const categoryLabels = {
-        leadership: 'Leadership & Delivery',
-        domain: 'Domain Expertise',
-        technical: 'Technical Team',
-        change: 'Change Management'
-    };
-
-    const categoryColors = {
-        leadership: '#3b82f6',
-        domain: '#8b5cf6',
-        technical: '#06b6d4',
-        change: '#f59e0b'
-    };
+    const categoryLabels = { leadership: 'Leadership & Delivery', domain: 'Domain Expertise', technical: 'Technical Team', change: 'Change Management' };
+    const categoryColors = { leadership: '#3b82f6', domain: '#8b5cf6', technical: '#06b6d4', change: '#f59e0b' };
 
     let html = '';
     const categories = ['leadership', 'domain', 'technical', 'change'];
@@ -249,9 +354,7 @@ function renderTeamRoster() {
         const catRoles = roles.filter(r => r.category === cat);
         if (catRoles.length === 0) return;
         html += `<div class="roster-category">
-            <h4 class="roster-cat-title" style="border-left: 3px solid ${categoryColors[cat]}; padding-left: 10px;">
-                ${categoryLabels[cat]}
-            </h4>
+            <h4 class="roster-cat-title" style="border-left: 3px solid ${categoryColors[cat]}; padding-left: 10px;">${categoryLabels[cat]}</h4>
             ${catRoles.map(r => `
                 <div class="roster-role">
                     <div class="role-info">
@@ -269,10 +372,8 @@ function renderTeamRoster() {
 
     roster.innerHTML = html;
 
-    // Allocation bars
     const allocationBars = document.getElementById('allocationBars');
     const totalHeadcount = roles.reduce((sum, r) => sum + r.count, 0);
-
     const catTotals = {};
     categories.forEach(cat => {
         catTotals[cat] = roles.filter(r => r.category === cat).reduce((sum, r) => sum + r.count, 0);
@@ -321,11 +422,9 @@ function updateCosts() {
     const licenseCfg = DATA.costMultipliers.license[state.licenseModel];
     const moduleCount = state.selectedModules.size;
 
-    // Implementation cost: team rate * hours * duration * delivery multiplier
     const monthlyTeamCost = roles.reduce((sum, r) => sum + (r.count * r.rate * 160), 0);
     const implCost = Math.round(monthlyTeamCost * duration * deliveryMult);
 
-    // Technology cost
     let techCost;
     if (state.licenseModel === 'onprem') {
         techCost = licenseCfg.base + (moduleCount * licenseCfg.perModule);
@@ -334,15 +433,10 @@ function updateCosts() {
     }
     techCost = Math.round(techCost);
 
-    // Change management: ~12% of impl cost
     const changeCost = Math.round(implCost * 0.12);
-
-    // Support: ~20% of annual impl cost
     const supportCost = Math.round((implCost / duration * 12) * 0.18);
-
     const totalCost = implCost + techCost + changeCost;
 
-    // Update DOM
     document.getElementById('implCost').textContent = formatCurrency(implCost);
     document.getElementById('techCost').textContent = formatCurrency(techCost);
     document.getElementById('changeCost').textContent = formatCurrency(changeCost);
@@ -350,7 +444,6 @@ function updateCosts() {
     document.getElementById('totalCost').textContent = formatCurrency(totalCost);
     document.getElementById('totalCostRange').textContent = `Range: ${formatCurrency(Math.round(totalCost * 0.85))} — ${formatCurrency(Math.round(totalCost * 1.2))}`;
 
-    // ROI calculations
     const annualSavings = Math.round(moduleCount * 125000 + (state.teamSize === 'large' ? 500000 : state.teamSize === 'medium' ? 250000 : 100000));
     const threeYearROI = Math.round(((annualSavings * 3 - totalCost) / totalCost) * 100);
     const paybackMonths = Math.round(totalCost / (annualSavings / 12));
@@ -385,7 +478,7 @@ function renderTimeline() {
                 </div>
             </div>
             <div class="phase-deliverables">
-                ${phase.deliverables.map((d, di) => `
+                ${phase.deliverables.map(d => `
                     <div class="deliverable-card">
                         <div class="del-header">
                             <span class="del-name">${d.name}</span>
@@ -401,7 +494,6 @@ function renderTimeline() {
         </div>
     `).join('');
 
-    // Deliverables how-to table
     renderDeliverables();
 }
 
@@ -431,6 +523,205 @@ function renderDeliverables() {
 }
 
 // ----------------------------------------------------------
+// PROPOSAL GENERATOR
+// ----------------------------------------------------------
+function getProposalConfig() {
+    const modules = DATA.scopeModules[state.industry];
+    const selectedModulesArr = [];
+    const moduleNames = [];
+    state.selectedModules.forEach(idx => {
+        if (modules[idx]) {
+            selectedModulesArr.push(modules[idx]);
+            moduleNames.push(modules[idx].name);
+        }
+    });
+
+    const roles = DATA.teamRoles[state.teamSize];
+    const headcount = roles.reduce((sum, r) => sum + r.count, 0);
+    const count = state.selectedModules.size;
+    let complexity = 'Low';
+    if (count <= 3) complexity = 'Low';
+    else if (count <= 6) complexity = 'Medium';
+    else if (count <= 8) complexity = 'High';
+    else complexity = 'Enterprise';
+
+    return {
+        industry: state.industry,
+        industryLabel: state.industry === 'agency' ? 'Agency' : 'Publisher',
+        moduleCount: count,
+        moduleNames,
+        selectedModules: selectedModulesArr,
+        teamSize: state.teamSize,
+        teamSizeLabel: state.teamSize.charAt(0).toUpperCase() + state.teamSize.slice(1),
+        headcount,
+        duration: state.duration,
+        deliveryModel: state.deliveryModel,
+        complexity,
+        totalCost: document.getElementById('totalCost').textContent,
+        implCost: document.getElementById('implCost').textContent,
+        techCost: document.getElementById('techCost').textContent,
+        changeCost: document.getElementById('changeCost').textContent,
+        supportCost: document.getElementById('supportCost').textContent,
+        roiPercent: document.getElementById('roiPercent').textContent,
+        paybackMonths: document.getElementById('paybackMonths').textContent,
+        annualSavings: document.getElementById('annualSavings').textContent,
+        fteHoursSaved: document.getElementById('fteReduction').textContent,
+        roles,
+        phases: DATA.phases[state.industry],
+        generatedFrom: state.generatedFrom
+    };
+}
+
+function generateProposal() {
+    const c = getProposalConfig();
+    const templates = DATA.proposalTemplates?.[state.industry];
+
+    if (!templates || c.moduleCount === 0) {
+        alert('Please select at least one module before generating a proposal.');
+        return;
+    }
+
+    const content = document.getElementById('proposalContent');
+    document.getElementById('proposalDate').textContent = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+    let html = '';
+
+    // Executive Summary
+    html += `<div class="proposal-section">
+        <h3>Executive Summary</h3>
+        <div class="proposal-exec-summary">${templates.executiveSummary(c)}</div>
+    </div>`;
+
+    // Scope of Work
+    html += `<div class="proposal-section">
+        <h3>Scope of Work</h3>
+        <div class="proposal-text">${templates.scopeNarrative(c)}</div>
+        <div class="proposal-module-grid">
+            ${c.moduleNames.map(n => `<div class="proposal-module-item">${n}</div>`).join('')}
+        </div>
+    </div>`;
+
+    // Implementation Approach
+    html += `<div class="proposal-section">
+        <h3>Implementation Approach</h3>
+        <div class="proposal-text">${templates.approachNarrative(c)}</div>
+    </div>`;
+
+    // Team Composition
+    html += `<div class="proposal-section">
+        <h3>Team Composition</h3>
+        <div class="proposal-text"><strong>${c.teamSizeLabel} team</strong> of <strong>${c.headcount} FTEs</strong> with ${c.deliveryModel} delivery model.</div>
+        <table class="proposal-team-table">
+            <thead><tr><th>Role</th><th>Count</th><th>Focus</th></tr></thead>
+            <tbody>${c.roles.map(r => `<tr><td>${r.role}</td><td>${r.count}</td><td>${r.responsibilities}</td></tr>`).join('')}</tbody>
+        </table>
+    </div>`;
+
+    // Investment Summary
+    html += `<div class="proposal-section">
+        <h3>Investment Summary</h3>
+        <div class="proposal-text">${templates.investmentNarrative(c)}</div>
+        <div class="proposal-cost-grid">
+            <div class="proposal-cost-item"><div class="pcl">Implementation</div><div class="pcv">${c.implCost}</div></div>
+            <div class="proposal-cost-item"><div class="pcl">Technology</div><div class="pcv">${c.techCost}</div></div>
+            <div class="proposal-cost-item"><div class="pcl">Change Mgmt</div><div class="pcv">${c.changeCost}</div></div>
+            <div class="proposal-cost-item" style="border-color: var(--accent);">
+                <div class="pcl">Total Investment</div><div class="pcv" style="color: var(--accent-light);">${c.totalCost}</div>
+            </div>
+        </div>
+    </div>`;
+
+    // ROI Projection
+    html += `<div class="proposal-section">
+        <h3>ROI Projection</h3>
+        <div class="proposal-text">${templates.roiNarrative(c)}</div>
+        <div class="proposal-cost-grid">
+            <div class="proposal-cost-item"><div class="pcl">3-Year ROI</div><div class="pcv" style="color:var(--green);">${c.roiPercent}</div></div>
+            <div class="proposal-cost-item"><div class="pcl">Payback</div><div class="pcv">${c.paybackMonths} mo</div></div>
+            <div class="proposal-cost-item"><div class="pcl">Annual Savings</div><div class="pcv" style="color:var(--green);">${c.annualSavings}</div></div>
+            <div class="proposal-cost-item"><div class="pcl">FTE Hours Saved</div><div class="pcv">${c.fteHoursSaved}/yr</div></div>
+        </div>
+    </div>`;
+
+    content.innerHTML = html;
+    document.getElementById('proposalModal').classList.add('active');
+}
+
+function closeProposal() {
+    document.getElementById('proposalModal').classList.remove('active');
+}
+
+function copyProposal() {
+    const content = document.getElementById('proposalContent');
+    const text = content.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+        const btn = document.querySelector('.proposal-actions .btn-primary');
+        const orig = btn.textContent;
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = orig, 2000);
+    });
+}
+
+function printProposal() {
+    window.print();
+}
+
+// ----------------------------------------------------------
+// GAMMA EXPORT
+// ----------------------------------------------------------
+function prepareGammaExport() {
+    const c = getProposalConfig();
+    const templates = DATA.proposalTemplates?.[state.industry];
+
+    if (!templates || c.moduleCount === 0) {
+        alert('Please select at least one module before exporting.');
+        return;
+    }
+
+    const execSummary = templates.executiveSummary(c).replace(/<[^>]+>/g, '');
+    const scopeText = templates.scopeNarrative(c).replace(/<[^>]+>/g, '');
+    const approachText = templates.approachNarrative(c).replace(/<[^>]+>/g, '');
+
+    let payload = `# FP&A Automation Proposal — ${c.industryLabel}\n\n`;
+    payload += `## Executive Summary\n${execSummary}\n\n`;
+    payload += `## Scope of Work\n${scopeText}\n\n`;
+    payload += `### Selected Modules (${c.moduleCount})\n`;
+    c.moduleNames.forEach(n => payload += `- ${n}\n`);
+    payload += `\n## Implementation Approach\n${approachText}\n\n`;
+    payload += `## Team\n- Size: ${c.teamSizeLabel} (${c.headcount} FTEs)\n- Model: ${c.deliveryModel}\n- Duration: ${c.duration} months\n\n`;
+    payload += `## Investment\n- Implementation: ${c.implCost}\n- Technology: ${c.techCost}\n- Change Management: ${c.changeCost}\n- **Total: ${c.totalCost}**\n\n`;
+    payload += `## ROI Projection\n- 3-Year ROI: ${c.roiPercent}\n- Payback: ${c.paybackMonths} months\n- Annual Savings: ${c.annualSavings}\n- FTE Hours Saved: ${c.fteHoursSaved}/yr\n\n`;
+    payload += `## Timeline\n`;
+    c.phases.forEach(phase => {
+        payload += `### ${phase.name} (${phase.duration})\n`;
+        phase.deliverables.forEach(d => {
+            payload += `- **${d.name}** (${d.weeks} weeks): ${d.description}\n`;
+        });
+        payload += '\n';
+    });
+
+    // Store for external access
+    window.__gammaExportPayload = payload;
+
+    document.getElementById('gammaExportText').value = payload;
+    document.getElementById('gammaExportModal').classList.add('active');
+}
+
+function closeGammaExport() {
+    document.getElementById('gammaExportModal').classList.remove('active');
+}
+
+function copyGammaExport() {
+    const textarea = document.getElementById('gammaExportText');
+    navigator.clipboard.writeText(textarea.value).then(() => {
+        const btn = document.querySelector('.gamma-actions .btn-primary');
+        const orig = btn.textContent;
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = orig, 2000);
+    });
+}
+
+// ----------------------------------------------------------
 // EXPORT SUMMARY
 // ----------------------------------------------------------
 function renderExportSummary() {
@@ -449,6 +740,7 @@ function renderExportSummary() {
             <h4>Industry</h4>
             <p>${state.industry === 'agency' ? 'Agency' : 'Publisher'}</p>
         </div>
+        ${state.generatedFrom ? `<div class="export-section"><h4>Generated From</h4><p>${state.generatedFrom}</p></div>` : ''}
         <div class="export-section">
             <h4>Selected Modules (${state.selectedModules.size})</h4>
             <div class="export-tags">${selectedNames.map(n => `<span class="export-tag">${n}</span>`).join('')}</div>
@@ -482,32 +774,11 @@ function exportPlan() {
     const plan = {
         industry: state.industry,
         generatedAt: new Date().toISOString(),
-        scope: {
-            modules: selectedModulesArr,
-            totalModules: state.selectedModules.size,
-            complexity: document.getElementById('complexityLevel').textContent
-        },
-        team: {
-            size: state.teamSize,
-            roles: DATA.teamRoles[state.teamSize],
-            totalHeadcount: DATA.teamRoles[state.teamSize].reduce((s, r) => s + r.count, 0)
-        },
-        financials: {
-            duration: state.duration + ' months',
-            deliveryModel: state.deliveryModel,
-            licenseModel: state.licenseModel,
-            totalInvestment: document.getElementById('totalCost').textContent,
-            implementation: document.getElementById('implCost').textContent,
-            technology: document.getElementById('techCost').textContent,
-            changeManagement: document.getElementById('changeCost').textContent,
-            annualSupport: document.getElementById('supportCost').textContent
-        },
-        roi: {
-            threeYearROI: document.getElementById('roiPercent').textContent,
-            paybackMonths: document.getElementById('paybackMonths').textContent,
-            annualSavings: document.getElementById('annualSavings').textContent,
-            fteHoursSaved: document.getElementById('fteReduction').textContent
-        },
+        generatedFrom: state.generatedFrom,
+        scope: { modules: selectedModulesArr, totalModules: state.selectedModules.size, complexity: document.getElementById('complexityLevel').textContent },
+        team: { size: state.teamSize, roles: DATA.teamRoles[state.teamSize], totalHeadcount: DATA.teamRoles[state.teamSize].reduce((s, r) => s + r.count, 0) },
+        financials: { duration: state.duration + ' months', deliveryModel: state.deliveryModel, licenseModel: state.licenseModel, totalInvestment: document.getElementById('totalCost').textContent, implementation: document.getElementById('implCost').textContent, technology: document.getElementById('techCost').textContent, changeManagement: document.getElementById('changeCost').textContent, annualSupport: document.getElementById('supportCost').textContent },
+        roi: { threeYearROI: document.getElementById('roiPercent').textContent, paybackMonths: document.getElementById('paybackMonths').textContent, annualSavings: document.getElementById('annualSavings').textContent, fteHoursSaved: document.getElementById('fteReduction').textContent },
         timeline: DATA.phases[state.industry]
     };
 
@@ -521,7 +792,7 @@ function exportPlan() {
 }
 
 // ----------------------------------------------------------
-// SCROLL EFFECTS
+// SCROLL EFFECTS & KEYBOARD
 // ----------------------------------------------------------
 function initScrollEffects() {
     const navbar = document.getElementById('navbar');
@@ -529,14 +800,21 @@ function initScrollEffects() {
         navbar.classList.toggle('scrolled', window.scrollY > 50);
     });
 
-    // Smooth scroll for nav links
     document.querySelectorAll('.nav-links a').forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
             const target = document.querySelector(link.getAttribute('href'));
-            if (target) {
-                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
+            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
+    });
+}
+
+function initKeyboardShortcuts() {
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeArchDetail();
+            closeProposal();
+            closeGammaExport();
+        }
     });
 }

@@ -22,6 +22,7 @@
                 <a href="#team">Team</a>
                 <a href="#cost">Cost</a>
                 <a href="#timeline">Timeline</a>
+                <a href="#summary" class="nav-proposal-link">Proposal</a>
             </div>
             <div class="industry-toggle" id="industryToggle">
                 <button class="toggle-btn active" data-industry="agency" onclick="setIndustry('agency')">Agencies</button>
@@ -147,6 +148,14 @@
                 <span class="section-tag">Project Configurator</span>
                 <h2 class="section-title">Define Your Project Scope</h2>
                 <p class="section-desc">Select the modules and capabilities that match your transformation goals.</p>
+            </div>
+            <!-- Generated From Banner -->
+            <div id="generatedFromBanner" class="generated-from-banner" style="display: none;">
+                <div class="gfb-content">
+                    <span class="gfb-icon">⚡</span>
+                    <span>Auto-configured from: <strong id="generatedFromName"></strong></span>
+                </div>
+                <button class="gfb-clear" onclick="clearGeneratedFrom()">✕ Clear</button>
             </div>
             <div class="scope-layout">
                 <div class="scope-modules" id="scopeModules">
@@ -346,7 +355,9 @@
                     <!-- Populated by JS -->
                 </div>
                 <div class="export-actions">
-                    <button class="btn-primary" onclick="exportPlan()">Export Project Plan (JSON)</button>
+                    <button class="btn-primary" onclick="generateProposal()">Generate Proposal</button>
+                    <button class="btn-secondary" onclick="prepareGammaExport()">Prepare Gamma Presentation</button>
+                    <button class="btn-tertiary" onclick="exportPlan()">Export JSON</button>
                 </div>
             </div>
         </div>
@@ -367,6 +378,77 @@
             </div>
         </div>
     </footer>
+
+    <!-- Architecture Detail Modal -->
+    <div id="archDetailModal" class="modal-overlay" onclick="if(event.target===this)closeArchDetail()">
+        <div class="modal-content modal-arch">
+            <button class="modal-close" onclick="closeArchDetail()">✕</button>
+            <div class="modal-arch-header">
+                <span class="modal-arch-layer" id="archModalLayer"></span>
+                <h2 class="modal-arch-title" id="archModalTitle"></h2>
+                <span class="modal-arch-sub" id="archModalSub"></span>
+            </div>
+            <div class="modal-arch-body">
+                <div class="modal-arch-col">
+                    <h3><span class="col-icon">⚙</span> Technical Perspective</h3>
+                    <p id="archModalTech"></p>
+                </div>
+                <div class="modal-arch-col">
+                    <h3><span class="col-icon">📊</span> Business Perspective</h3>
+                    <p id="archModalBusiness"></p>
+                </div>
+            </div>
+            <div class="modal-arch-connections">
+                <h3>Data Flow Connections</h3>
+                <div class="connections-layout">
+                    <div class="conn-group">
+                        <span class="conn-label">Upstream (data from)</span>
+                        <div class="conn-tags" id="archModalUpstream"></div>
+                    </div>
+                    <div class="conn-arrow">→</div>
+                    <div class="conn-current" id="archModalCurrentName"></div>
+                    <div class="conn-arrow">→</div>
+                    <div class="conn-group">
+                        <span class="conn-label">Downstream (feeds into)</span>
+                        <div class="conn-tags" id="archModalDownstream"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Proposal Modal -->
+    <div id="proposalModal" class="modal-overlay" onclick="if(event.target===this)closeProposal()">
+        <div class="modal-content modal-proposal">
+            <button class="modal-close" onclick="closeProposal()">✕</button>
+            <div class="proposal-header">
+                <h2>FP&A Automation Proposal</h2>
+                <span class="proposal-date" id="proposalDate"></span>
+            </div>
+            <div id="proposalContent">
+                <!-- Populated by JS -->
+            </div>
+            <div class="proposal-actions">
+                <button class="btn-primary" onclick="copyProposal()">Copy to Clipboard</button>
+                <button class="btn-secondary" onclick="printProposal()">Print / PDF</button>
+                <button class="btn-secondary" onclick="closeProposal();prepareGammaExport()">Export to Gamma</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gamma Export Modal -->
+    <div id="gammaExportModal" class="modal-overlay" onclick="if(event.target===this)closeGammaExport()">
+        <div class="modal-content modal-gamma">
+            <button class="modal-close" onclick="closeGammaExport()">✕</button>
+            <h2>Gamma Presentation Export</h2>
+            <p class="gamma-desc">The content below is formatted for Gamma presentation generation. Copy it or click "Generate" to create a slide deck.</p>
+            <textarea id="gammaExportText" class="gamma-export-textarea" readonly></textarea>
+            <div class="gamma-actions">
+                <button class="btn-primary" onclick="copyGammaExport()">Copy to Clipboard</button>
+                <button class="btn-secondary" onclick="closeGammaExport()">Close</button>
+            </div>
+        </div>
+    </div>
 
     <script src="data.js"></script>
     <script src="app.js"></script>
