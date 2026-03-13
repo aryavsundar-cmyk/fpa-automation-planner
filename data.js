@@ -589,14 +589,126 @@ const DATA = {
     // TECHNOLOGY STACK
     // ----------------------------------------------------------
     techStack: [
-        { category: "Cloud Platform", options: ["AWS", "Azure", "GCP"], recommended: "Snowflake + AWS/GCP" },
-        { category: "Data Ingestion", options: ["Fivetran", "Airbyte", "Stitch"], recommended: "Fivetran" },
-        { category: "Transformation", options: ["dbt", "Dataform", "Matillion"], recommended: "dbt Core / Cloud" },
-        { category: "Orchestration", options: ["Airflow", "Dagster", "Prefect"], recommended: "Airflow / Dagster" },
-        { category: "ML / AI", options: ["Python/scikit", "Prophet", "Vertex AI"], recommended: "Prophet + Custom Python" },
-        { category: "Visualization", options: ["Tableau", "Power BI", "Looker"], recommended: "Tableau / Power BI" },
-        { category: "Planning Tool", options: ["Anaplan", "Pigment", "Planful"], recommended: "Anaplan / Pigment" },
-        { category: "Data Quality", options: ["Monte Carlo", "Great Expectations", "Soda"], recommended: "Monte Carlo" }
+        {
+            category: "Data Warehouse",
+            options: ["Snowflake", "BigQuery", "Redshift"],
+            recommended: "Snowflake",
+            moduleIndices: [0, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+            minComplexity: "Low",
+            deliveryModels: ["onshore", "offshore", "hybrid"],
+            architectureLayers: ["platform", "sources", "apps"],
+            costImpact: "$200K-$500K/yr",
+            reason: "Foundation for all data integration and analytics",
+            criticality: "Critical"
+        },
+        {
+            category: "Cloud Platform",
+            options: ["AWS", "Azure", "GCP"],
+            recommended: "AWS or GCP",
+            moduleIndices: [0, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+            minComplexity: "Low",
+            deliveryModels: ["onshore", "offshore", "hybrid"],
+            architectureLayers: ["platform"],
+            costImpact: "$150K-$400K/yr",
+            reason: "Cloud infrastructure for scalable data and analytics platform",
+            criticality: "Critical"
+        },
+        {
+            category: "Data Ingestion",
+            options: ["Fivetran", "Airbyte", "Stitch"],
+            recommended: "Fivetran",
+            moduleIndices: [0, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+            minComplexity: "Low",
+            deliveryModels: ["onshore", "offshore", "hybrid"],
+            architectureLayers: ["sources", "platform"],
+            costImpact: "$50K-$150K/yr",
+            reason: "Automated connector framework from ERP, billing, CRM systems",
+            criticality: "Critical"
+        },
+        {
+            category: "Transformation",
+            options: ["dbt", "Dataform", "Matillion"],
+            recommended: "dbt Core/Cloud",
+            moduleIndices: [0, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+            minComplexity: "Low",
+            deliveryModels: ["onshore", "offshore", "hybrid"],
+            architectureLayers: ["platform"],
+            costImpact: "$0-$100K/yr",
+            reason: "SQL-based data transformation and model governance",
+            criticality: "Critical"
+        },
+        {
+            category: "Orchestration",
+            options: ["Airflow", "Dagster", "Prefect"],
+            recommended: "Airflow or Dagster",
+            moduleIndices: [0, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+            minComplexity: "Low",
+            deliveryModels: ["onshore", "offshore", "hybrid"],
+            architectureLayers: ["platform"],
+            costImpact: "$50K-$150K/yr",
+            reason: "Data pipeline orchestration and dependency management",
+            criticality: "Critical"
+        },
+        {
+            category: "ML / AI",
+            options: ["Python/scikit", "Prophet", "Vertex AI"],
+            recommended: "Prophet + Custom Python",
+            moduleIndices: [1, 2, 5, 6, 10, 11, 13],
+            minComplexity: "Medium",
+            deliveryModels: ["onshore", "offshore", "hybrid"],
+            architectureLayers: ["platform", "apps"],
+            costImpact: "$75K-$200K/yr",
+            reason: "Time series forecasting (Revenue, Subscriber) and predictive analytics",
+            criticality: "Optional"
+        },
+        {
+            category: "Visualization",
+            options: ["Tableau", "Power BI", "Looker"],
+            recommended: "Tableau or Power BI",
+            moduleIndices: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+            minComplexity: "Low",
+            deliveryModels: ["onshore", "offshore", "hybrid"],
+            architectureLayers: ["apps", "outputs"],
+            costImpact: "$100K-$300K/yr",
+            reason: "Interactive dashboards and executive reporting",
+            criticality: "Critical"
+        },
+        {
+            category: "Planning / Simulation",
+            options: ["Anaplan", "Pigment", "Planful"],
+            recommended: "Anaplan or Pigment",
+            moduleIndices: [2, 5, 6, 9, 11, 12, 13, 14],
+            minComplexity: "Medium",
+            deliveryModels: ["onshore", "offshore", "hybrid"],
+            architectureLayers: ["apps"],
+            costImpact: "$100K-$250K/yr",
+            reason: "Scenario planning, financial modeling, and what-if analysis",
+            criticality: "Optional"
+        },
+        {
+            category: "Data Quality",
+            options: ["Monte Carlo", "Great Expectations", "Soda"],
+            recommended: "Monte Carlo",
+            moduleIndices: [0, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+            minComplexity: "Low",
+            deliveryModels: ["onshore", "offshore", "hybrid"],
+            architectureLayers: ["platform"],
+            costImpact: "$50K-$100K/yr",
+            reason: "Data quality monitoring and anomaly detection",
+            criticality: "Critical"
+        },
+        {
+            category: "Metadata & Governance",
+            options: ["Collibra", "Alation", "Apache Atlas"],
+            recommended: "Alation",
+            moduleIndices: [0, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+            minComplexity: "Medium",
+            deliveryModels: ["onshore", "offshore", "hybrid"],
+            architectureLayers: ["platform"],
+            costImpact: "$75K-$150K/yr",
+            reason: "Data catalog, lineage tracking, and governance framework",
+            criticality: "Optional"
+        }
     ],
 
     // ----------------------------------------------------------

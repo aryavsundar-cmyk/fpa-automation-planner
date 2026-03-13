@@ -450,6 +450,52 @@
         </div>
     </div>
 
+    <!-- Tech Detail Modal -->
+    <div id="techDetailModal" class="modal-overlay" onclick="if(event.target===this)closeTechDetail()">
+        <div class="modal-content modal-tech">
+            <button class="modal-close" onclick="closeTechDetail()">✕</button>
+            <div class="tech-detail-header">
+                <h2 id="techDetailCategory"></h2>
+                <div class="tech-detail-badges">
+                    <span class="tech-criticality-badge" id="techDetailCriticality"></span>
+                </div>
+            </div>
+
+            <div class="tech-detail-section">
+                <h3>Recommended</h3>
+                <div id="techDetailRecommended" class="tech-detail-recommended"></div>
+            </div>
+
+            <div class="tech-detail-section">
+                <h3>Options</h3>
+                <div id="techDetailOptions" style="display: flex; gap: 0.5rem; flex-wrap: wrap;"></div>
+            </div>
+
+            <div class="tech-detail-section">
+                <h3>Relevance to Your Project</h3>
+                <div class="tech-relevance-indicator">
+                    <div class="tech-relevance-bar">
+                        <div id="techDetailRelevanceBar" class="tech-relevance-fill"></div>
+                    </div>
+                    <span id="techDetailRelevancePercent" class="tech-relevance-text"></span>
+                </div>
+            </div>
+
+            <div class="tech-detail-section">
+                <h3>Why This Technology</h3>
+                <div id="techDetailReason" style="font-size: 0.95rem; line-height: 1.6;"></div>
+            </div>
+
+            <div class="tech-detail-section">
+                <div id="techDetailArchitecture"></div>
+            </div>
+
+            <div class="tech-detail-actions">
+                <button class="btn-secondary" onclick="closeTechDetail()">Close</button>
+            </div>
+        </div>
+    </div>
+
     <script src="data.js"></script>
     <script src="app.js"></script>
 </body>

@@ -46,6 +46,7 @@ function setIndustry(industry) {
     renderArchitecture();
     renderScopeModules();
     renderTimeline();
+    renderTechStack();
     updateCosts();
     renderExportSummary();
 }
@@ -153,14 +154,141 @@ function renderArchitecture() {
         `).join('');
     });
 
+    renderTechStack();
+}
+
+function renderTechStack() {
     const techGrid = document.getElementById('techGrid');
-    techGrid.innerHTML = DATA.techStack.map(tech => `
-        <div class="tech-card">
-            <span class="tech-category">${tech.category}</span>
-            <span class="tech-recommended">${tech.recommended}</span>
-            <div class="tech-options">${tech.options.map(o => `<span class="tech-option">${o}</span>`).join('')}</div>
-        </div>
-    `).join('');
+    const scoredTech = scoreAndFilterTechStack();
+
+    techGrid.innerHTML = scoredTech.map((item, idx) => {
+        const { tech, score, isRelevant, matchedModules } = item;
+        const scorePercent = Math.round(score * 100);
+        const opacity = isRelevant ? 1 : 0.5;
+        const borderColor = score >= 0.8 ? '#7c5cff' : score >= 0.5 ? '#4f46e5' : '#6b7280';
+
+        return `
+            <div class="tech-card tech-card-${tech.criticality.toLowerCase()}"
+                 style="opacity: ${opacity}; border-color: ${borderColor};"
+                 onclick="openTechDetail(${idx})">
+                <div class="tech-relevance-badge" style="width: ${scorePercent}%; background: ${borderColor};"></div>
+                <div class="tech-card-header">
+                    <span class="tech-category">${tech.category}</span>
+                    <span class="tech-criticality-badge ${tech.criticality.toLowerCase()}">${tech.criticality}</span>
+                </div>
+                <span class="tech-recommended">${tech.recommended}</span>
+                <div class="tech-options">${tech.options.map(o => `<span class="tech-option">${o}</span>`).join('')}</div>
+                ${matchedModules.length > 0 ? `<div class="tech-modules-matched">${matchedModules.length} module${matchedModules.length !== 1 ? 's' : ''}</div>` : ''}
+                <div class="tech-click-hint">↗ Click for details</div>
+            </div>
+        `;
+    }).join('');
+}
+
+function scoreAndFilterTechStack() {
+    const modules = DATA.scopeModules[state.industry];
+    const selectedCount = state.selectedModules.size;
+
+    // Calculate complexity based on module count
+    let complexity = 'Low';
+    if (selectedCount <= 3) complexity = 'Low';
+    else if (selectedCount <= 6) complexity = 'Medium';
+    else if (selectedCount <= 8) complexity = 'High';
+    else complexity = 'Enterprise';
+
+    return DATA.techStack.map((tech, idx) => {
+        let score = 0;
+        const matchedModules = [];
+
+        // 1. Check if tech supports selected modules
+        for (let modIdx of state.selectedModules) {
+            if (tech.moduleIndices && tech.moduleIndices.includes(modIdx)) {
+                score += 0.3;
+                matchedModules.push(modIdx);
+            }
+        }
+
+        // 2. Check complexity alignment
+        const complexityLevel = { 'Low': 1, 'Medium': 2, 'High': 3, 'Enterprise': 4 };
+        const techComplexity = complexityLevel[tech.minComplexity] || 1;
+        const selectedComplexity = complexityLevel[complexity] || 1;
+        if (techComplexity <= selectedComplexity) {
+            score += 0.2;
+        }
+
+        // 3. Check delivery model compatibility
+        if (tech.deliveryModels && tech.deliveryModels.includes(state.deliveryModel)) {
+            score += 0.1;
+        }
+
+        // 4. Criticality boost
+        if (tech.criticality === 'Critical') {
+            score += 0.2;
+        }
+
+        // Normalize score (0-1)
+        score = Math.min(score, 1);
+
+        const isRelevant = score >= 0.3 || (tech.criticality === 'Critical' && selectedCount > 0);
+
+        return { tech, idx, score, isRelevant, matchedModules };
+    }).sort((a, b) => {
+        // Sort by relevance, then criticality, then score
+        if (a.isRelevant !== b.isRelevant) return b.isRelevant - a.isRelevant;
+        const criticalityScore = { 'Critical': 3, 'Optional': 2, 'Alternative': 1 };
+        if (criticalityScore[b.tech.criticality] !== criticalityScore[a.tech.criticality]) {
+            return criticalityScore[b.tech.criticality] - criticalityScore[a.tech.criticality];
+        }
+        return b.score - a.score;
+    });
+}
+
+function openTechDetail(idx) {
+    const scoredTech = scoreAndFilterTechStack();
+    const { tech, score, matchedModules } = scoredTech[idx];
+    const modules = DATA.scopeModules[state.industry];
+
+    const moduleList = matchedModules.map(modIdx =>
+        `<li><strong>${modules[modIdx]?.name || 'Unknown'}</strong> — ${modules[modIdx]?.description || ''}</li>`
+    ).join('');
+
+    const architectureConnections = tech.architectureLayers
+        ? tech.architectureLayers.map(layer => {
+            const layerNames = { 'sources': 'Data Sources', 'platform': 'Data Platform', 'apps': 'Application Layer', 'outputs': 'Outputs' };
+            return `<span class="arch-connection-tag">${layerNames[layer]}</span>`;
+        }).join('')
+        : '';
+
+    const scorePercent = Math.round(score * 100);
+
+    document.getElementById('techDetailCategory').textContent = tech.category;
+    document.getElementById('techDetailRecommended').textContent = tech.recommended;
+    document.getElementById('techDetailCriticality').textContent = tech.criticality;
+    document.getElementById('techDetailRelevanceBar').style.width = scorePercent + '%';
+    document.getElementById('techDetailRelevancePercent').textContent = scorePercent + '%';
+    document.getElementById('techDetailRelevancePercent').parentElement.style.borderColor = scorePercent >= 80 ? '#7c5cff' : scorePercent >= 50 ? '#4f46e5' : '#6b7280';
+
+    document.getElementById('techDetailOptions').innerHTML = tech.options
+        .map(o => `<span class="tech-option">${o}</span>`).join('');
+
+    document.getElementById('techDetailReason').innerHTML = `
+        <p><strong>Why for your project:</strong> ${tech.reason}</p>
+        <p><strong>Cost impact:</strong> ${tech.costImpact}</p>
+        ${matchedModules.length > 0 ? `
+            <p><strong>Used by your selected modules (${matchedModules.length}):</strong></p>
+            <ul style="margin: 0.5rem 0 0 1.5rem; padding: 0; font-size: 0.9rem;">${moduleList}</ul>
+        ` : '<p style="color: #9ca3af; font-style: italic;">Not directly used by your selected modules, but part of the recommended foundation.</p>'}
+    `;
+
+    document.getElementById('techDetailArchitecture').innerHTML = architectureConnections
+        ? `<p><strong>Architecture layers:</strong></p><div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">${architectureConnections}</div>`
+        : '';
+
+    document.getElementById('techDetailModal').classList.add('active');
+}
+
+function closeTechDetail() {
+    document.getElementById('techDetailModal').classList.remove('active');
 }
 
 function openArchDetail(layer, idx) {
@@ -289,6 +417,7 @@ function toggleModule(idx) {
     renderScopeModules();
     updateCosts();
     renderExportSummary();
+    renderTechStack(); // Re-render tech stack with new relevance scores
 }
 
 function updateScopeSummary() {
@@ -401,6 +530,7 @@ function setDeliveryModel(model) {
     });
     updateCosts();
     renderExportSummary();
+    renderTechStack(); // Re-render tech stack based on delivery model
 }
 
 function setLicenseModel(model) {

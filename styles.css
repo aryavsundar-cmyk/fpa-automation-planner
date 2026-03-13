@@ -384,22 +384,95 @@ ul { list-style: none; }
 .tech-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
 .tech-card {
     background: var(--bg-card);
-    border: 1px solid var(--border);
+    border: 2px solid var(--border);
     border-radius: var(--radius-sm);
-    padding: 20px;
+    padding: 16px;
     display: flex;
     flex-direction: column;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+.tech-card:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--accent);
+    transform: translateY(-4px);
+}
+.tech-card.tech-card-critical { border-left: 4px solid #7c5cff; }
+.tech-card.tech-card-optional { border-left: 4px solid #4f46e5; }
+.tech-card.tech-card-alternative { border-left: 4px solid #6b7280; }
+
+.tech-relevance-badge {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #7c5cff, #4f46e5);
+    transition: width 0.3s ease;
+}
+
+.tech-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     gap: 8px;
 }
+
 .tech-category { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim); font-weight: 600; }
+.tech-criticality-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.tech-criticality-badge.critical {
+    background: rgba(124, 92, 255, 0.2);
+    color: #7c5cff;
+}
+.tech-criticality-badge.optional {
+    background: rgba(79, 70, 229, 0.2);
+    color: #4f46e5;
+}
+.tech-criticality-badge.alternative {
+    background: rgba(107, 114, 128, 0.2);
+    color: #9ca3af;
+}
+
 .tech-recommended { font-size: 15px; font-weight: 700; color: var(--accent-light); }
 .tech-options { display: flex; gap: 6px; flex-wrap: wrap; }
 .tech-option {
-    padding: 2px 8px;
-    background: rgba(255, 255, 255, 0.04);
+    padding: 4px 10px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 4px;
     font-size: 11px;
     color: var(--text-dim);
+    font-weight: 500;
+}
+
+.tech-modules-matched {
+    font-size: 11px;
+    color: var(--accent-light);
+    font-weight: 600;
+    padding-top: 4px;
+    border-top: 1px solid var(--border);
+}
+
+.tech-click-hint {
+    font-size: 10px;
+    color: var(--text-dim);
+    text-align: right;
+    margin-top: 4px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+.tech-card:hover .tech-click-hint {
+    opacity: 1;
 }
 
 /* ============================================================
@@ -1069,6 +1142,91 @@ ul { list-style: none; }
     margin-bottom: 16px;
 }
 .gamma-actions { display: flex; gap: 12px; }
+
+/* Tech Detail Modal */
+.modal-tech { max-width: 700px; }
+.tech-detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+}
+.tech-detail-header h2 {
+    font-size: 24px;
+    color: var(--text-bright);
+    margin: 0;
+}
+.tech-detail-badges {
+    display: flex;
+    gap: 8px;
+}
+.tech-detail-section {
+    margin-bottom: 24px;
+}
+.tech-detail-section h3 {
+    font-size: 14px;
+    color: var(--accent-light);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+.tech-detail-recommended {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-bright);
+    padding: 12px;
+    background: rgba(99, 102, 241, 0.1);
+    border-left: 3px solid var(--accent);
+    border-radius: 6px;
+}
+.tech-relevance-indicator {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.tech-relevance-bar {
+    flex: 1;
+    height: 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+}
+.tech-relevance-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #7c5cff, #4f46e5);
+    transition: width 0.3s ease;
+}
+.tech-relevance-text {
+    min-width: 50px;
+    font-weight: 700;
+    color: var(--accent-light);
+    font-size: 16px;
+    border: 2px solid var(--border);
+    padding: 6px 12px;
+    border-radius: 6px;
+    background: var(--bg-card);
+}
+.arch-connection-tag {
+    display: inline-block;
+    padding: 6px 12px;
+    background: rgba(79, 70, 229, 0.15);
+    border: 1px solid rgba(79, 70, 229, 0.3);
+    color: var(--accent-light);
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+}
+.tech-detail-actions {
+    display: flex;
+    gap: 12px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+}
 
 /* ============================================================
    RESPONSIVE
