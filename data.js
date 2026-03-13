@@ -36,155 +36,189 @@ const DATA = {
         agency: [
             {
                 id: "rev-forecast",
-                title: "Revenue Forecasting",
+                title: "Revenue Forecasting & FP&A Automation",
                 icon: "📈",
-                description: "Automated revenue forecasting across client accounts, service lines, and geographies with rolling 12-18 month projections.",
+                description: "Automated revenue forecasting with agentic AI operating in real-time on pipeline, contract, and financial data. Eliminates 60-70% of manual FP&A data aggregation, moving FP&A from backward-looking reporting to forward-looking strategic planning.",
                 painPoints: [
-                    "Manual spreadsheet consolidation across 20+ entities",
-                    "Inconsistent forecast methodologies across teams",
-                    "2-3 week lag in revenue visibility"
+                    "Manual spreadsheet consolidation across 20+ entities taking 2-3 weeks",
+                    "Inconsistent forecast methodologies across teams (agency vs. entity vs. client)",
+                    "FP&A teams spending 60-70% of time collecting/validating data instead of analyzing",
+                    "Budget vs. actual variance analysis runs 30-45 days behind reality"
                 ],
                 automationValue: [
-                    "Real-time pipeline-to-revenue conversion modeling",
-                    "ML-based forecast with 95%+ accuracy",
-                    "Automated scenario planning (best/base/worst)"
+                    "Real-time pipeline-to-revenue conversion modeling with leading indicators",
+                    "FP&A Forecast Agent autonomously flags variances, generates explanations, escalates anomalies",
+                    "Rolling forecast replacing static quarterly budgets; updated weekly from source systems",
+                    "Automated board-pack generation with AI-generated narrative"
                 ],
-                kpis: ["Forecast accuracy ↑ 30%", "Close cycle ↓ 60%", "Revenue leakage ↓ 15%"],
+                kpis: ["Forecast accuracy ↑ 30%", "FP&A data time ↓ 70%", "Close cycle ↓ 60%", "Strategic decision speed ↑ 3x"],
                 complexity: "high",
                 projectPlan: { moduleIndices: [0, 1, 2], teamSize: "medium", duration: 9 }
             },
             {
-                id: "resource-util",
-                title: "Resource & Utilization Planning",
-                icon: "👥",
-                description: "Optimize staffing and utilization rates across client engagements with demand-driven capacity planning.",
+                id: "billing-reconciliation",
+                title: "Campaign Billing Reconciliation & Variance Detection",
+                icon: "🔍",
+                description: "Agentic automation of planned vs. actual campaign reconciliation across 8-20 platforms (DV360, TTD, Meta, Roku, CTV). Eliminates 500-800 monthly reconciliation hours and resolves billing disputes in real-time rather than month-end.",
                 painPoints: [
-                    "Over/under-staffing on client accounts",
-                    "No visibility into forward utilization",
-                    "Manual resource allocation in spreadsheets"
+                    "Gap between planned and actual delivery averages 5-15% (spikes to 30-40% in programmatic/CTV)",
+                    "500-800 hours per month per major account on manual matching across platforms",
+                    "Billing disputes delay payments 30-60 days, straining vendor relationships and media access",
+                    "Cross-platform attribution conflicts inflate reported performance by 20-40%"
                 ],
                 automationValue: [
-                    "Demand forecasting tied to pipeline and contracts",
-                    "Automated utilization dashboards by role/team/office",
-                    "Bench optimization and redeployment alerts"
+                    "Campaign Variance Agent monitors planned vs. actual spend/delivery in real-time across all platforms",
+                    "Automated discrepancy detection and classification (platform delivery issue vs. billing error vs. measurement conflict)",
+                    "Client-ready variance reports generated automatically with recommended budget reallocations",
+                    "Billing dispute resolution routed to correct vendor with supporting reconciliation data"
                 ],
-                kpis: ["Utilization ↑ 8-12%", "Bench cost ↓ 25%", "Staffing time ↓ 50%"],
+                kpis: ["Reconciliation hours ↓ 85%", "Variance detection from monthly → real-time", "Billing dispute resolution ↓ 60%", "Payment cycle acceleration → 45 days"],
                 complexity: "high",
-                projectPlan: { moduleIndices: [0, 4, 2], teamSize: "small", duration: 6 }
-            },
-            {
-                id: "client-profit",
-                title: "Client Profitability Analysis",
-                icon: "💰",
-                description: "Granular P&L visibility at the client, project, and campaign level with automated cost allocation.",
-                painPoints: [
-                    "Indirect costs allocated by gut feel, not data",
-                    "Profitability known only at quarter-end",
-                    "No real-time margin alerts"
-                ],
-                automationValue: [
-                    "Activity-based costing with automated allocation",
-                    "Real-time client margin dashboards",
-                    "Automated alerts when margins fall below threshold"
-                ],
-                kpis: ["Margin visibility from quarterly → daily", "Unprofitable client actions ↑ 40%", "Average margin ↑ 3-5pp"],
-                complexity: "medium",
-                projectPlan: { moduleIndices: [0, 3, 2], teamSize: "small", duration: 6 }
+                projectPlan: { moduleIndices: [0, 1, 3, 5, 6], teamSize: "medium", duration: 12 }
             },
             {
                 id: "cash-flow",
-                title: "Cash Flow Management",
+                title: "Working Capital & Cash Flow Management",
                 icon: "💵",
-                description: "Automated cash flow forecasting incorporating retainer billing cycles, project milestones, and vendor payments.",
+                description: "Automated cash flow forecasting and AR/AP optimization. Holding companies typically carry $2-5B in working capital deficits due to vendor net 30-60 terms vs. client net 45-90 terms. This module recaptures 8-15 days of DSO and optimizes media float.",
                 painPoints: [
-                    "Unpredictable cash position due to mixed billing",
-                    "Manual AR/AP reconciliation",
-                    "Media pass-through timing mismatches"
+                    "DSO runs 75-90 days vs. 45-day best-in-class (industry-wide problem = $2-5B trapped per major holdco)",
+                    "Manual AR/AP reconciliation taking 15-25 days of each cycle",
+                    "Media pass-through timing mismatches (invoice receipt → payment → revenue recognition)",
+                    "Early payment discounts and volume rebates missed due to fragmented AP visibility"
                 ],
                 automationValue: [
-                    "13-week rolling cash flow forecast",
-                    "Automated AR aging alerts and collection triggers",
-                    "Media float optimization engine"
+                    "13-week rolling cash flow forecast incorporating retainer cycles, project milestones, payment terms",
+                    "AP Prioritization Agent recommends daily payment priorities based on vendor relationship health, discount opportunities, and cash forecasts",
+                    "Automated AR aging alerts and collection triggers; credit management across OpCos",
+                    "Media float optimization engine capturing early payment discounts and rebate opportunities"
                 ],
-                kpis: ["Cash forecast accuracy ↑ 40%", "DSO ↓ 8-12 days", "Working capital ↑ 15%"],
+                kpis: ["Cash forecast accuracy ↑ 40%", "DSO ↓ 8-15 days", "Working capital freed ↑ $500M+", "Early payment discount capture ↑ 95%"],
                 complexity: "medium",
-                projectPlan: { moduleIndices: [0, 5, 2], teamSize: "small", duration: 6 }
+                projectPlan: { moduleIndices: [0, 5, 2], teamSize: "small", duration: 8 }
             },
             {
-                id: "budget-variance",
-                title: "Budget vs. Actual Variance",
-                icon: "📊",
-                description: "Automated BvA reporting with drill-down capabilities from consolidated to entity to client level.",
+                id: "client-profit",
+                title: "Client Profitability & Campaign Economics",
+                icon: "💰",
+                description: "Real-time P&L visibility at client, project, and campaign level with automated cost allocation. Agency profit margins are fundamentally unknowable until consolidation is automated — this solves that problem at transaction level.",
                 painPoints: [
-                    "3+ weeks to produce monthly BvA reports",
-                    "No root-cause drill-down capability",
-                    "Inconsistent chart of accounts across entities"
+                    "Indirect costs allocated by gut feel or legacy formulas, not actual consumption data",
+                    "Profitability known only at quarter-end (30-45 days after close); no real-time visibility",
+                    "No ability to distinguish profitable campaigns from margin-killers within a large account",
+                    "Renegotiation opportunities with clients missed due to lack of contract-to-actual visibility"
                 ],
                 automationValue: [
-                    "Real-time BvA dashboards with auto-commentary",
-                    "Automated variance explanation using AI/NLP",
-                    "Standardized COA mapping across entities"
+                    "Activity-based costing with automated allocation of labor, platform fees, creative time to campaigns",
+                    "Real-time client margin dashboards updated daily; thresholds for margin concerns",
+                    "Contract Compliance Agent monitors client MSA terms against actual billing; flags deviations; identifies cross-OpCo clients for consolidation",
+                    "Campaign economics available within 24 hours of close, not 30+ days"
                 ],
-                kpis: ["BvA report time ↓ 80%", "Variance resolution ↓ 50%", "COA consistency 100%"],
+                kpis: ["Margin visibility from monthly → daily", "Unprofitable client identification ↑ 40%", "Contract renegotiation success ↑ 25%", "Average margin ↑ 3-5pp"],
                 complexity: "medium",
-                projectPlan: { moduleIndices: [0, 2, 9], teamSize: "small", duration: 6 }
+                projectPlan: { moduleIndices: [0, 3, 2], teamSize: "small", duration: 7 }
+            },
+            {
+                id: "supply-path",
+                title: "Supply Path Optimization & Principal Media Risk",
+                icon: "🚀",
+                description: "Automated supply path transparency and optimization. As holding companies increasingly act as media principals (buying inventory at scale, reselling to clients), they need real-time visibility into inventory status, billing reconciliation, and supply path efficiency.",
+                painPoints: [
+                    "15-25 SSP relationships per campaign with conflicting reporting; reconciliation is manual and late",
+                    "Principal media positions create balance sheet exposure when inventory is unsold or billing disputed",
+                    "Header bidding complexity means buy-side/sell-side logs diverge by 10-20% on average",
+                    "ANA Media Transparency mandates require supply chain visibility that doesn't exist at current scale"
+                ],
+                automationValue: [
+                    "Unified SSP scorecard across all agencies; real-time supply path performance tracking",
+                    "Invoice Reconciliation Agent matches SSP invoices to internal PO and delivery data; flags discrepancies; routes exceptions",
+                    "Principal media inventory tracking: bought, sold, unresolved reconciliations, aging exceptions",
+                    "Supply path transparency reporting for clients meeting ANA Media Transparency requirements"
+                ],
+                kpis: ["Supply path reconciliation time ↓ 80%", "Inventory discrepancy visibility ↑ 95%", "Principal media exception resolution ↓ 50%", "ANA compliance automation 100%"],
+                complexity: "high",
+                projectPlan: { moduleIndices: [0, 3, 4, 5, 6], teamSize: "medium", duration: 10 }
             },
             {
                 id: "consolidation",
-                title: "Multi-Entity Consolidation",
+                title: "HoldCo-Level Financial Consolidation & Real-Time Visibility",
                 icon: "🏢",
-                description: "Automated intercompany eliminations, currency translation, and consolidation across holding company entities.",
+                description: "Automated multi-entity consolidation with real-time HoldCo-level visibility. Operating companies run independent ERPs (SAP, NetSuite, Oracle); consolidation currently requires armies of staff manually downloading/cleaning/reconciling data from 50-200+ systems.",
                 painPoints: [
-                    "Manual intercompany reconciliation taking 5+ days",
-                    "Currency translation errors",
-                    "Consolidation adjustments tracked in offline spreadsheets"
+                    "Manual consolidation with 3-5 week lag; decisions made on stale data",
+                    "Manual IC matching and elimination taking 5+ days per cycle",
+                    "Currency, revenue recognition, and intercompany transactions require manual adjustment at every close",
+                    "M&A integration (e.g., Omnicom+IPG) collapses into multi-year ERP consolidation unless data layer deployed first"
                 ],
                 automationValue: [
-                    "Automated IC matching and elimination",
-                    "Real-time currency translation with rate feeds",
-                    "Audit-ready consolidation trail"
+                    "Unified dimensional model spanning all OpCos; automatic daily consolidation",
+                    "Automated IC detection, matching, and elimination; audit-ready consolidation trail",
+                    "Real-time currency translation with automated rate feeds; revenue recognition rules centralized",
+                    "HoldCo financial OS (Snowflake data warehouse) enables instant consolidation and drill-down"
                 ],
-                kpis: ["Consolidation time ↓ 70%", "IC exceptions ↓ 90%", "Audit prep ↓ 50%"],
+                kpis: ["Consolidation time ↓ 70%", "IC exceptions ↓ 90%", "Data lag from 3-5 weeks → daily", "Audit prep time ↓ 60%"],
                 complexity: "high",
                 projectPlan: { moduleIndices: [0, 2, 6, 9], teamSize: "medium", duration: 9 }
             },
             {
-                id: "commission",
-                title: "Commission & Incentive Comp",
-                icon: "🎯",
-                description: "Automated commission calculations tied to revenue recognition, client retention, and performance metrics.",
+                id: "ap-ar-optimization",
+                title: "AP/AR Consolidation & Vendor/Client Renegotiation",
+                icon: "💼",
+                description: "Holdco-level consolidation of AP and AR enables vendor renegotiation at scale. Holding companies are largest media/service buyers globally but negotiate individually at agency level — missing 8-15% savings opportunity.",
                 painPoints: [
-                    "Manual commission spreadsheets with frequent errors",
-                    "Disputes due to lack of transparency",
-                    "No real-time visibility into earned commissions"
+                    "Vendor relationships negotiated at OpCo level; volume-based discounts and preferred pricing unavailable",
+                    "A single client (e.g., Unilever) has 10-15 separate MSAs across agencies at different rates",
+                    "Tech spend audit impossible without consolidated vendor visibility; estimated $100-200M addressable",
+                    "Early payment discounts and rebate opportunities lost due to fragmented AP visibility"
                 ],
                 automationValue: [
-                    "Rule-based commission engine with audit trail",
-                    "Self-service portal for reps to track earnings",
-                    "Automated accrual calculations"
+                    "Consolidated AP visibility across all vendors; automated vendor consolidation scoring",
+                    "Consolidated AR visibility across all clients; client contract term harmonization recommendations",
+                    "AP Prioritization Agent recommends vendor consolidation and renegotiation priorities based on spend, relationship health, and negotiation history",
+                    "Contract Compliance Agent identifies cross-client and cross-OpCo relationships eligible for enterprise agreements"
                 ],
-                kpis: ["Calc errors ↓ 95%", "Disputes ↓ 80%", "Processing time ↓ 70%"],
+                kpis: ["Vendor consolidation yield 8-15%", "Tech spend optimization ↑ $100-200M", "Client contract standardization ↑ 40%", "Early payment discount capture ↑ 90%"],
+                complexity: "medium",
+                projectPlan: { moduleIndices: [0, 5, 2], teamSize: "medium", duration: 8 }
+            },
+            {
+                id: "commission",
+                title: "Commission & Incentive Compensation",
+                icon: "🎯",
+                description: "Automated commission calculations tied to revenue recognition, client retention, and performance metrics. Eliminates manual spreadsheet disputes and provides real-time visibility into earned commissions.",
+                painPoints: [
+                    "Manual commission spreadsheets with frequent calculation errors and disputes",
+                    "Disputes due to lack of transparency in revenue recognition timing",
+                    "No real-time visibility into earned commissions (discovered quarterly in manual reconciliation)"
+                ],
+                automationValue: [
+                    "Rule-based commission engine with full audit trail and version control",
+                    "Self-service portal for reps to track real-time commission earnings",
+                    "Automated accrual calculations tied to revenue recognition system"
+                ],
+                kpis: ["Calculation errors ↓ 95%", "Disputes ↓ 80%", "Processing time ↓ 70%", "Earnings visibility from quarterly → daily"],
                 complexity: "low",
-                projectPlan: { moduleIndices: [0, 7], teamSize: "small", duration: 4 }
+                projectPlan: { moduleIndices: [0, 7], teamSize: "small", duration: 5 }
             },
             {
                 id: "scenario-plan",
-                title: "Scenario & Strategic Planning",
+                title: "Scenario & Strategic Planning with Agentic AI",
                 icon: "🔮",
-                description: "Driver-based financial modeling with Monte Carlo simulation for strategic decision support.",
+                description: "Driver-based financial modeling with automated what-if analysis. Moves FP&A from static quarterly budgets to continuous scenario modeling powering real-time strategic decisions.",
                 painPoints: [
-                    "Scenario analysis limited to 2-3 manual cases",
-                    "No linkage between operational and financial plans",
-                    "Board decks take weeks to prepare"
+                    "Scenario analysis limited to 2-3 manual cases per cycle; insights static",
+                    "No linkage between operational KPIs (DSO, utilization, margin) and financial plans",
+                    "Board-ready strategic output takes weeks to prepare; decisions lag market conditions"
                 ],
                 automationValue: [
-                    "1000+ scenario Monte Carlo simulation",
-                    "Driver-based models linked to operational KPIs",
-                    "Automated board-ready output generation"
+                    "1000+ scenario Monte Carlo simulation; results updated weekly as base data refreshes",
+                    "Driver-based models automatically linked to operational KPIs; sensitivity analysis automated",
+                    "Automated board-pack generation with AI-driven narrative explaining assumptions and implications",
+                    "Scenario planning tied to real-time actuals; what-if questions answered in hours not weeks"
                 ],
-                kpis: ["Scenarios per cycle ↑ 100x", "Planning cycle ↓ 40%", "Decision speed ↑ 3x"],
+                kpis: ["Scenarios per cycle ↑ 100x", "Planning cycle ↓ 50%", "Decision speed ↑ 3x", "Strategic agility ↑ 4x"],
                 complexity: "high",
-                projectPlan: { moduleIndices: [0, 1, 8, 9], teamSize: "medium", duration: 9 }
+                projectPlan: { moduleIndices: [0, 1, 8, 9], teamSize: "medium", duration: 10 }
             }
         ],
         publisher: [
