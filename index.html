@@ -475,11 +475,16 @@
         </div>
     </div>
 
+    <!-- Data definitions -->
     <script src="data.js"></script>
+
+    <!-- Phase 1-5 Core: State Management (must load before app.js) -->
+    <script src="src/core/stateManager.js"></script>
+
+    <!-- Application logic (uses appState) -->
     <script src="app.js"></script>
 
     <!-- Phase 1-5 Enhancement Modules -->
-    <script src="src/core/stateManager.js"></script>
     <script src="src/modules/phase1/persistentSidebar.js"></script>
     <script src="src/modules/phase1/stakeholderViews.js"></script>
 
