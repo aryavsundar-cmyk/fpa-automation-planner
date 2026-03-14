@@ -1,6 +1,8 @@
 /* ============================================================
-   FP&A AUTOMATION — STYLES
+   FP&A AUTOMATION — TAILWIND CSS v4 STYLES
    ============================================================ */
+
+@import "tailwindcss";
 
 :root {
     --bg: #0a0a0f;
