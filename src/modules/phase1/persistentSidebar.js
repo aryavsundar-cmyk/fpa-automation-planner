@@ -6,7 +6,8 @@
 
 class PersistentSidebar {
     constructor() {
-        this.isOpen = true;
+        // Load sidebar state from localStorage, default to true (open)
+        this.isOpen = localStorage.getItem('fpa_sidebar_open') !== 'false';
         this.init();
     }
 
@@ -15,6 +16,7 @@ class PersistentSidebar {
         this.attachEventListeners();
         this.subscribeToStateChanges();
         this.setupResponsive();
+        this.applyInitialState();
     }
 
     createSidebar() {
@@ -143,6 +145,12 @@ class PersistentSidebar {
             toggleBtn.addEventListener('click', () => this.toggleSidebar());
         }
 
+        // Sidebar toggle for desktop
+        const desktopToggleBtn = document.getElementById('desktop-sidebar-toggle');
+        if (desktopToggleBtn) {
+            desktopToggleBtn.addEventListener('click', () => this.toggleSidebar());
+        }
+
         // Settings
         const darkModeToggle = document.getElementById('dark-mode-toggle');
         if (darkModeToggle) {
@@ -169,7 +177,7 @@ class PersistentSidebar {
         });
 
         appState.subscribe('teamSize', (newValue) => {
-            const sizes = { small: 'Small (1 FTE)', medium: 'Medium (11.5 FTE)', large: 'Large (14 FTE)' };
+            const sizes = { small: 'Small (5.5 FTE)', medium: 'Medium (11.5 FTE)', large: 'Large (24 FTE)' };
             const el = document.getElementById('sidebar-teamsize');
             if (el) el.textContent = sizes[newValue] || newValue;
         });
@@ -184,7 +192,20 @@ class PersistentSidebar {
             if (el) el.textContent = `${newValue.size} module${newValue.size !== 1 ? 's' : ''}`;
         });
 
-        // Listen for cost updates (simulated - actual implementation depends on cost calculation)
+        // Listen for cost updates from app state or cost transparency module
+        const updateCostDisplay = () => {
+            const totalCostEl = document.getElementById('sidebar-cost');
+            if (totalCostEl) {
+                const costText = document.getElementById('totalCost')?.textContent || '$450K';
+                totalCostEl.textContent = costText;
+            }
+        };
+
+        appState.subscribe('selectedModules', updateCostDisplay);
+        appState.subscribe('teamSize', updateCostDisplay);
+        appState.subscribe('duration', updateCostDisplay);
+
+        // Listen for overall state changes to update scenarios list
         appState.subscribe('*', () => {
             this.updateScenariosList();
         });
@@ -200,7 +221,32 @@ class PersistentSidebar {
                 toggle.className = 'lg:hidden px-3 py-2 text-slate-300 hover:text-white';
                 toggle.innerHTML = '☰';
                 toggle.onclick = () => this.toggleSidebar();
-                nav.querySelector('.flex.items-center.justify-between')?.insertBefore(toggle, nav.querySelector('.flex.items-center.justify-between').firstChild);
+                const navContainer = nav.querySelector('.flex.items-center.justify-between');
+                if (navContainer) {
+                    navContainer.insertBefore(toggle, navContainer.firstChild);
+                }
+            }
+        }
+    }
+
+    applyInitialState() {
+        // Apply initial sidebar state based on localStorage
+        const sidebar = document.getElementById('persistent-sidebar');
+        if (sidebar) {
+            // On desktop, sidebar should be visible by default unless user explicitly closed it
+            const desktopToggle = document.getElementById('desktop-sidebar-toggle');
+            if (this.isOpen) {
+                sidebar.style.display = 'flex';
+                if (window.innerWidth >= 1024) {
+                    document.body.classList.add('sidebar-expanded');
+                    if (desktopToggle) desktopToggle.innerHTML = '◀';
+                }
+            } else {
+                sidebar.style.display = 'none';
+                if (window.innerWidth >= 1024) {
+                    document.body.classList.remove('sidebar-expanded');
+                    if (desktopToggle) desktopToggle.innerHTML = '▶';
+                }
             }
         }
     }
@@ -209,7 +255,25 @@ class PersistentSidebar {
         const sidebar = document.getElementById('persistent-sidebar');
         if (sidebar) {
             this.isOpen = !this.isOpen;
-            sidebar.classList.toggle('hidden');
+
+            // Toggle visibility using inline styles
+            sidebar.style.display = this.isOpen ? 'flex' : 'none';
+
+            // On desktop, also adjust body margin
+            if (window.innerWidth >= 1024) {
+                if (this.isOpen) {
+                    document.body.classList.add('sidebar-expanded');
+                } else {
+                    document.body.classList.remove('sidebar-expanded');
+                }
+
+                // Update toggle button icon
+                const desktopToggle = document.getElementById('desktop-sidebar-toggle');
+                if (desktopToggle) {
+                    desktopToggle.innerHTML = this.isOpen ? '◀' : '▶';
+                }
+            }
+
             localStorage.setItem('fpa_sidebar_open', this.isOpen);
         }
     }

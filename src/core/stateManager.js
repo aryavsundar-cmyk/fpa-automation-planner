@@ -14,6 +14,9 @@ class StateManager {
             duration: 9,
             pricingMode: 'package',
 
+            // Pricing Calculator
+            calculatorRoles: {},
+
             // UI State
             currentSection: 'hero',
             stakeholderView: 'executive', // executive | technical | financial
@@ -139,6 +142,7 @@ class StateManager {
             teamSize: this.state.teamSize,
             duration: this.state.duration,
             pricingMode: this.state.pricingMode,
+            calculatorRoles: this.state.calculatorRoles,
             timestamp: new Date().toISOString(),
         };
 
@@ -163,6 +167,9 @@ class StateManager {
         this.set('teamSize', scenario.teamSize);
         this.set('duration', scenario.duration);
         this.set('pricingMode', scenario.pricingMode);
+        if (scenario.calculatorRoles) {
+            this.set('calculatorRoles', scenario.calculatorRoles);
+        }
         this.set('currentScenario', name);
 
         return scenario;
@@ -212,6 +219,7 @@ class StateManager {
             teamSize: 'medium',
             duration: 9,
             pricingMode: 'package',
+            calculatorRoles: {},
             currentSection: 'hero',
             stakeholderView: 'executive',
             sidebarOpen: true,

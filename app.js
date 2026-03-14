@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setIndustry('agency');
     setTeamSize('medium');
     applyPreset('standard');
+    setPricingMode('package');
     initScrollEffects();
     initKeyboardShortcuts();
 });
