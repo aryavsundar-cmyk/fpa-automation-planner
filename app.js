@@ -2,16 +2,9 @@
 // FP&A AUTOMATION — APPLICATION LOGIC
 // ============================================================
 
-let state = {
-    industry: 'agency',
-    selectedModules: new Set(),
-    teamSize: 'medium',
-    duration: 9,
-    generatedFrom: null,
-    expandedModules: new Set(),
-    pricingMode: 'package', // 'package' or 'calculator'
-    calculatorRoles: {} // Stores which roles are selected in calculator
-};
+// State is now managed by StateManager (appState)
+// All state access: appState.get(key)
+// All state mutations: appState.set(key, value)
 
 // ----------------------------------------------------------
 // INITIALIZATION
@@ -28,9 +21,9 @@ document.addEventListener('DOMContentLoaded', () => {
 // INDUSTRY TOGGLE
 // ----------------------------------------------------------
 function setIndustry(industry) {
-    state.industry = industry;
-    state.generatedFrom = null;
-    state.expandedModules = new Set();
+    appState.set('industry', industry);
+    appState.set('generatedFrom', null);
+    appState.set('expandedModules', new Set());
     hideGeneratedFromBanner();
 
     // Update toggle buttons using specific IDs
@@ -63,7 +56,7 @@ function setIndustry(industry) {
 // CONTEXT BANNER
 // ----------------------------------------------------------
 function renderContextBanner() {
-    const items = DATA.context[state.industry].contextItems;
+    const items = DATA.context[appState.get('industry')].contextItems;
     const banner = document.getElementById('contextBanner');
     banner.innerHTML = items.map(item => `
         <div class="flex flex-col items-center gap-2 p-4 bg-slate-800/30 rounded-lg border border-slate-700">
@@ -80,7 +73,7 @@ function renderContextBanner() {
 // USE CASES (Clickable → auto-configure project)
 // ----------------------------------------------------------
 function renderUseCases() {
-    const cases = DATA.useCases[state.industry];
+    const cases = DATA.useCases[appState.get('industry')];
     const grid = document.getElementById('useCasesGrid');
     grid.innerHTML = cases.map((uc, i) => `
         <div class="rounded-lg border border-slate-800 p-6 hover:border-slate-700 transition-colors bg-slate-900/50 cursor-pointer hover:bg-slate-700/50 hover:shadow-lg hover:shadow-slate-900/50 transition-all" style="animation-delay: ${i * 0.05}s" onclick="selectUseCaseProject(${i})">
@@ -111,16 +104,16 @@ function renderUseCases() {
 }
 
 function selectUseCaseProject(idx) {
-    const uc = DATA.useCases[state.industry][idx];
+    const uc = DATA.useCases[appState.get('industry')][idx];
     if (!uc || !uc.projectPlan) return;
 
     const plan = uc.projectPlan;
-    state.selectedModules = new Set(plan.moduleIndices);
+    appState.set('selectedModules', new Set(plan.moduleIndices));
     const teamSize = plan.recommendedTeamSize || plan.teamSize;
     const duration = plan.recommendedDuration || plan.duration;
-    state.teamSize = teamSize;
-    state.duration = duration;
-    state.generatedFrom = uc.title;
+    appState.set('teamSize', teamSize);
+    appState.set('duration', duration);
+    appState.set('generatedFrom', uc.title);
 
     document.getElementById('durationSlider').value = duration;
     document.getElementById('durationDisplay').textContent = `${duration} months`;
@@ -151,7 +144,7 @@ function hideGeneratedFromBanner() {
 }
 
 function clearGeneratedFrom() {
-    state.generatedFrom = null;
+    appState.set('generatedFrom', null);
     hideGeneratedFromBanner();
 }
 
@@ -159,7 +152,7 @@ function clearGeneratedFrom() {
 // ARCHITECTURE (Clickable → detail modal)
 // ----------------------------------------------------------
 function renderArchitecture() {
-    const arch = DATA.architecture[state.industry];
+    const arch = DATA.architecture[appState.get('industry')];
     const archContainer = document.getElementById('archContainer');
 
     const layerLabels = {
@@ -228,8 +221,8 @@ function renderTechStack() {
 }
 
 function scoreAndFilterTechStack() {
-    const modules = DATA.scopeModules[state.industry];
-    const selectedCount = state.selectedModules.size;
+    const modules = DATA.scopeModules[appState.get('industry')];
+    const selectedCount = appState.get('selectedModules').size;
 
     // Calculate complexity based on module count
     let complexity = 'Low';
@@ -243,7 +236,7 @@ function scoreAndFilterTechStack() {
         const matchedModules = [];
 
         // 1. Check if tech supports selected modules
-        for (let modIdx of state.selectedModules) {
+        for (let modIdx of appState.get('selectedModules')) {
             if (tech.moduleIndices && tech.moduleIndices.includes(modIdx)) {
                 score += 0.3;
                 matchedModules.push(modIdx);
@@ -283,7 +276,7 @@ function scoreAndFilterTechStack() {
 function openTechDetail(idx) {
     const scoredTech = scoreAndFilterTechStack();
     const { tech, score, matchedModules } = scoredTech[idx];
-    const modules = DATA.scopeModules[state.industry];
+    const modules = DATA.scopeModules[appState.get('industry')];
 
     const moduleList = matchedModules.map(modIdx =>
         `<li><strong>${modules[modIdx]?.name || 'Unknown'}</strong></li>`
@@ -377,7 +370,7 @@ function closeTechDetail() {
 }
 
 function openArchDetail(layer, idx) {
-    const arch = DATA.architecture[state.industry];
+    const arch = DATA.architecture[appState.get('industry')];
     const item = arch[layer][idx];
     if (!item) return;
 
@@ -446,7 +439,7 @@ function closeArchDetail() {
 // SCOPE MODULES (with detail expansion)
 // ----------------------------------------------------------
 function renderScopeModules() {
-    const modules = DATA.scopeModules[state.industry];
+    const modules = DATA.scopeModules[appState.get('industry')];
     const container = document.getElementById('modulesContainer');
     const categories = { core: 'Core Modules', analytics: 'Analytics Modules', advanced: 'Advanced Modules' };
 
@@ -458,8 +451,8 @@ function renderScopeModules() {
             <div class="space-y-3">
                 ${catModules.map(m => {
                     const globalIdx = modules.indexOf(m);
-                    const isSelected = state.selectedModules.has(globalIdx);
-                    const isExpanded = state.expandedModules.has(globalIdx);
+                    const isSelected = appState.get('selectedModules').has(globalIdx);
+                    const isExpanded = appState.get('expandedModules').has(globalIdx);
                     return `<div class="rounded-lg border ${isSelected ? 'border-indigo-600 bg-indigo-500/10' : 'border-slate-800 bg-slate-900/50'} p-4 cursor-pointer hover:border-slate-700 transition-colors" onclick="toggleModule(${globalIdx})">
                         <div class="flex gap-4">
                             <div class="flex items-center justify-center w-6 h-6 rounded border ${isSelected ? 'bg-indigo-600 border-indigo-500' : 'border-slate-700'}">${isSelected ? '<span style="color: white; font-weight: bold;">✓</span>' : ''}</div>
@@ -492,7 +485,7 @@ function renderModuleDetailPanel(m, idx, isExpanded) {
 
     const deps = m.dependencies && m.dependencies.length > 0
         ? m.dependencies.map(depId => {
-            const depMod = DATA.scopeModules[state.industry].find(mod => mod.id === depId);
+            const depMod = DATA.scopeModules[appState.get('industry')].find(mod => mod.id === depId);
             return depMod ? depMod.name : depId;
         })
         : ['None — standalone module'];
@@ -523,20 +516,24 @@ function renderModuleDetailPanel(m, idx, isExpanded) {
 
 function toggleModuleDetail(idx, event) {
     event.stopPropagation();
-    if (state.expandedModules.has(idx)) {
-        state.expandedModules.delete(idx);
+    const expanded = new Set(appState.get('expandedModules'));
+    if (expanded.has(idx)) {
+        expanded.delete(idx);
     } else {
-        state.expandedModules.add(idx);
+        expanded.add(idx);
     }
+    appState.set('expandedModules', expanded);
     renderScopeModules();
 }
 
 function toggleModule(idx) {
-    if (state.selectedModules.has(idx)) {
-        state.selectedModules.delete(idx);
+    const selected = new Set(appState.get('selectedModules'));
+    if (selected.has(idx)) {
+        selected.delete(idx);
     } else {
-        state.selectedModules.add(idx);
+        selected.add(idx);
     }
+    appState.set('selectedModules', selected);
     renderScopeModules();
     updateCosts();
     renderExportSummary();
@@ -544,14 +541,14 @@ function toggleModule(idx) {
 }
 
 function updateScopeSummary() {
-    const modules = DATA.scopeModules[state.industry];
-    const count = state.selectedModules.size;
+    const modules = DATA.scopeModules[appState.get('industry')];
+    const count = appState.get('selectedModules').size;
 
     const moduleCountEl = document.getElementById('moduleCount');
     if (moduleCountEl) moduleCountEl.textContent = count;
 
     let totalIntegrations = 0;
-    state.selectedModules.forEach(idx => {
+    appState.get('selectedModules').forEach(idx => {
         if (modules[idx]) totalIntegrations += modules[idx].integrations;
     });
 
@@ -570,9 +567,9 @@ function updateScopeSummary() {
 
 function applyPreset(preset) {
     const p = DATA.presets[preset];
-    state.selectedModules = new Set(p.modules);
-    state.teamSize = p.teamSize;
-    state.duration = p.duration;
+    appState.set('selectedModules', new Set(p.modules));
+    appState.set('teamSize', p.teamSize);
+    appState.set('duration', p.duration);
 
     document.getElementById('durationSlider').value = p.duration;
     document.getElementById('durationDisplay').textContent = `${p.duration} months`;
@@ -588,12 +585,12 @@ function applyPreset(preset) {
 // TEAM BUILDER
 // ----------------------------------------------------------
 function setTeamSize(size) {
-    state.teamSize = size;
+    appState.set('teamSize', size);
     renderTeamRoster();
 
     // Update costs based on pricing mode
-    if (state.pricingMode === 'calculator') {
-        state.calculatorRoles = {};
+    if (appState.get('pricingMode') === 'calculator') {
+        appState.set('calculatorRoles', {});
         initializeCalculator();
     } else {
         updateCosts();
@@ -604,7 +601,7 @@ function setTeamSize(size) {
 }
 
 function renderTeamRoster() {
-    const roles = DATA.teamRoles[state.teamSize];
+    const roles = DATA.teamRoles[appState.get('teamSize')];
     const roster = document.getElementById('teamRoster');
     const categoryLabels = { leadership: 'Leadership & Delivery', domain: 'Domain Expertise', technical: 'Technical Team', change: 'Change Management' };
     const categoryColors = { leadership: '#3b82f6', domain: '#8b5cf6', technical: '#06b6d4', change: '#f59e0b' };
@@ -667,20 +664,20 @@ function renderTeamRoster() {
 
 function updateCosts() {
     const duration = parseInt(document.getElementById('durationSlider').value);
-    state.duration = duration;
+    appState.set('duration', duration);
     document.getElementById('durationDisplay').textContent = `${duration} months`;
 
-    const moduleCount = state.selectedModules.size;
+    const moduleCount = appState.get('selectedModules').size;
     const pricing = DATA.pricing;
 
     // Base implementation cost for the team size
-    const implCost = pricing.implementation[state.teamSize];
+    const implCost = pricing.implementation[appState.get('teamSize')];
 
     // Technology cost per module (one-time)
     const techCost = moduleCount * pricing.perModule;
 
     // Change management cost based on team size
-    const changeCost = pricing.changeManagement[state.teamSize];
+    const changeCost = pricing.changeManagement[appState.get('teamSize')];
 
     // Monthly support cost across project duration
     const supportCost = pricing.supportPerMonth * duration;
@@ -696,10 +693,10 @@ function updateCosts() {
     document.getElementById('totalCostRange').textContent = `Range: ${formatCurrency(Math.round(totalCost * 0.90))} — ${formatCurrency(Math.round(totalCost * 1.15))}`;
 
     // ROI calculations based on module count and team size
-    const annualSavings = Math.round(moduleCount * 125000 + (state.teamSize === 'large' ? 500000 : state.teamSize === 'medium' ? 250000 : 100000));
+    const annualSavings = Math.round(moduleCount * 125000 + (appState.get('teamSize') === 'large' ? 500000 : appState.get('teamSize') === 'medium' ? 250000 : 100000));
     const threeYearROI = Math.round(((annualSavings * 3 - totalCost) / totalCost) * 100);
     const paybackMonths = Math.round(totalCost / (annualSavings / 12));
-    const fteHours = Math.round(moduleCount * 2400 + (state.teamSize === 'large' ? 8000 : state.teamSize === 'medium' ? 4000 : 2000));
+    const fteHours = Math.round(moduleCount * 2400 + (appState.get('teamSize') === 'large' ? 8000 : appState.get('teamSize') === 'medium' ? 4000 : 2000));
 
     document.getElementById('roiPercent').textContent = threeYearROI + '%';
     document.getElementById('paybackMonths').textContent = paybackMonths;
@@ -711,7 +708,7 @@ function updateCosts() {
 // PRICING MODE & CALCULATOR
 // ----------------------------------------------------------
 function setPricingMode(mode) {
-    state.pricingMode = mode;
+    appState.set('pricingMode', mode);
 
     // Update button states
     document.getElementById('packagePricingBtn').classList.toggle('active', mode === 'package');
@@ -722,7 +719,7 @@ function setPricingMode(mode) {
     document.getElementById('calculatorPricingControls').classList.toggle('hidden', mode !== 'calculator');
 
     // Initialize calculator on first use
-    if (mode === 'calculator' && Object.keys(state.calculatorRoles).length === 0) {
+    if (mode === 'calculator' && Object.keys(appState.get('calculatorRoles')).length === 0) {
         initializeCalculator();
     }
 
@@ -735,12 +732,13 @@ function setPricingMode(mode) {
 }
 
 function initializeCalculator() {
-    const roles = DATA.teamRoles[state.teamSize];
+    const roles = DATA.teamRoles[appState.get('teamSize')];
     const rolesList = document.getElementById('calculatorRolesList');
+    const calculatorRoles = {};
 
     rolesList.innerHTML = roles.map((role, idx) => {
-        const key = `${state.teamSize}-${idx}`;
-        state.calculatorRoles[key] = { selected: false, hoursPerWeek: 40, rate: role.rate, role: role.role };
+        const key = `${appState.get('teamSize')}-${idx}`;
+        calculatorRoles[key] = { selected: false, hoursPerWeek: 40, rate: role.rate, role: role.role };
 
         return `
             <div class="flex items-center gap-3 p-3 rounded-lg border border-slate-800 bg-slate-900/50 hover:bg-slate-800/50 transition-colors">
@@ -754,16 +752,21 @@ function initializeCalculator() {
             </div>
         `;
     }).join('');
+    appState.set('calculatorRoles', calculatorRoles);
 }
 
 function toggleCalculatorRole(key) {
     const checkbox = document.getElementById(`calc-role-${key}`);
-    state.calculatorRoles[key].selected = checkbox.checked;
+    const calculatorRoles = appState.get('calculatorRoles');
+    calculatorRoles[key].selected = checkbox.checked;
+    appState.set('calculatorRoles', calculatorRoles);
     updateCalculatorCosts();
 }
 
 function updateCalculatorRoleHours(key, hours) {
-    state.calculatorRoles[key].hoursPerWeek = parseInt(hours) || 0;
+    const calculatorRoles = appState.get('calculatorRoles');
+    calculatorRoles[key].hoursPerWeek = parseInt(hours) || 0;
+    appState.set('calculatorRoles', calculatorRoles);
     updateCalculatorCosts();
 }
 
@@ -771,7 +774,7 @@ function updateCalculatorCosts() {
     const durationWeeks = parseInt(document.getElementById('calcDurationWeeks').value) || 36;
     let totalRevenue = 0;
 
-    Object.entries(state.calculatorRoles).forEach(([key, roleConfig]) => {
+    Object.entries(appState.get('calculatorRoles')).forEach(([key, roleConfig]) => {
         const hours = roleConfig.hoursPerWeek * durationWeeks;
         const revenue = Math.round(hours * roleConfig.rate);
 
@@ -815,7 +818,7 @@ function formatCurrency(num) {
 // TIMELINE
 // ----------------------------------------------------------
 function renderTimeline() {
-    const phases = DATA.phases[state.industry];
+    const phases = DATA.phases[appState.get('industry')];
     const container = document.getElementById('timelineContainer');
 
     container.innerHTML = phases.map((phase, pi) => `
@@ -850,7 +853,7 @@ function renderTimeline() {
 }
 
 function renderDeliverables() {
-    const phases = DATA.phases[state.industry];
+    const phases = DATA.phases[appState.get('industry')];
     const table = document.getElementById('deliverablesTable');
     if (!table) return;
 
@@ -879,19 +882,19 @@ function renderDeliverables() {
 // PROPOSAL GENERATOR
 // ----------------------------------------------------------
 function getProposalConfig() {
-    const modules = DATA.scopeModules[state.industry];
+    const modules = DATA.scopeModules[appState.get('industry')];
     const selectedModulesArr = [];
     const moduleNames = [];
-    state.selectedModules.forEach(idx => {
+    appState.get('selectedModules').forEach(idx => {
         if (modules[idx]) {
             selectedModulesArr.push(modules[idx]);
             moduleNames.push(modules[idx].name);
         }
     });
 
-    const roles = DATA.teamRoles[state.teamSize];
+    const roles = DATA.teamRoles[appState.get('teamSize')];
     const headcount = roles.reduce((sum, r) => sum + r.count, 0);
-    const count = state.selectedModules.size;
+    const count = appState.get('selectedModules').size;
     let complexity = 'Low';
     if (count <= 3) complexity = 'Low';
     else if (count <= 6) complexity = 'Medium';
@@ -899,15 +902,15 @@ function getProposalConfig() {
     else complexity = 'Enterprise';
 
     return {
-        industry: state.industry,
-        industryLabel: state.industry === 'agency' ? 'Agency' : 'Publisher',
+        industry: appState.get('industry'),
+        industryLabel: appState.get('industry') === 'agency' ? 'Agency' : 'Publisher',
         moduleCount: count,
         moduleNames,
         selectedModules: selectedModulesArr,
-        teamSize: state.teamSize,
-        teamSizeLabel: state.teamSize.charAt(0).toUpperCase() + state.teamSize.slice(1),
+        teamSize: appState.get('teamSize'),
+        teamSizeLabel: appState.get('teamSize').charAt(0).toUpperCase() + appState.get('teamSize').slice(1),
         headcount,
-        duration: state.duration,
+        duration: appState.get('duration'),
         complexity,
         totalCost: document.getElementById('totalCost').textContent,
         implCost: document.getElementById('implCost').textContent,
@@ -919,14 +922,14 @@ function getProposalConfig() {
         annualSavings: document.getElementById('annualSavings').textContent,
         fteHoursSaved: document.getElementById('fteReduction').textContent,
         roles,
-        phases: DATA.phases[state.industry],
-        generatedFrom: state.generatedFrom
+        phases: DATA.phases[appState.get('industry')],
+        generatedFrom: appState.get('generatedFrom')
     };
 }
 
 function generateProposal() {
     const c = getProposalConfig();
-    const templates = DATA.proposalTemplates?.[state.industry];
+    const templates = DATA.proposalTemplates?.[appState.get('industry')];
 
     if (!templates || c.moduleCount === 0) {
         alert('Please select at least one module before generating a proposal.');
@@ -1057,7 +1060,7 @@ function printProposal() {
 // ----------------------------------------------------------
 function prepareGammaExport() {
     const c = getProposalConfig();
-    const templates = DATA.proposalTemplates?.[state.industry];
+    const templates = DATA.proposalTemplates?.[appState.get('industry')];
 
     if (!templates || c.moduleCount === 0) {
         alert('Please select at least one module before exporting.');
@@ -1121,13 +1124,13 @@ function copyGammaExport() {
 // EXPORT SUMMARY
 // ----------------------------------------------------------
 function renderExportSummary() {
-    const modules = DATA.scopeModules[state.industry];
+    const modules = DATA.scopeModules[appState.get('industry')];
     const selectedNames = [];
-    state.selectedModules.forEach(idx => {
+    appState.get('selectedModules').forEach(idx => {
         if (modules[idx]) selectedNames.push(modules[idx].name);
     });
 
-    const roles = DATA.teamRoles[state.teamSize];
+    const roles = DATA.teamRoles[appState.get('teamSize')];
     const totalHeadcount = roles.reduce((sum, r) => sum + r.count, 0);
 
     const el = document.getElementById('exportSummary');
@@ -1136,47 +1139,47 @@ function renderExportSummary() {
     el.innerHTML = `
         <div class="mb-4">
             <h4 class="text-slate-300 text-sm font-semibold mb-2">Industry</h4>
-            <p class="text-slate-100">${state.industry === 'agency' ? 'Agency' : 'Publisher'}</p>
+            <p class="text-slate-100">${appState.get('industry') === 'agency' ? 'Agency' : 'Publisher'}</p>
         </div>
-        ${state.generatedFrom ? `<div class="mb-4"><h4 class="text-slate-300 text-sm font-semibold mb-2">Generated From</h4><p class="text-slate-100">${state.generatedFrom}</p></div>` : ''}
+        ${appState.get('generatedFrom') ? `<div class="mb-4"><h4 class="text-slate-300 text-sm font-semibold mb-2">Generated From</h4><p class="text-slate-100">${appState.get('generatedFrom')}</p></div>` : ''}
         <div class="mb-4">
-            <h4 class="text-slate-300 text-sm font-semibold mb-2">Selected Modules (${state.selectedModules.size})</h4>
+            <h4 class="text-slate-300 text-sm font-semibold mb-2">Selected Modules (${appState.get('selectedModules').size})</h4>
             <div class="flex flex-wrap gap-2">${selectedNames.map(n => `<span class="inline-block px-3 py-1 rounded-full text-xs font-medium bg-indigo-500/20 text-indigo-300">${n}</span>`).join('')}</div>
         </div>
         <div class="mb-4">
             <h4 class="text-slate-300 text-sm font-semibold mb-2">Team</h4>
-            <p class="text-slate-100">${state.teamSize.charAt(0).toUpperCase() + state.teamSize.slice(1)} (${totalHeadcount} FTEs)</p>
+            <p class="text-slate-100">${appState.get('teamSize').charAt(0).toUpperCase() + appState.get('teamSize').slice(1)} (${totalHeadcount} FTEs)</p>
         </div>
         <div class="mb-4">
             <h4 class="text-slate-300 text-sm font-semibold mb-2">Duration</h4>
-            <p class="text-slate-100">${state.duration} months</p>
+            <p class="text-slate-100">${appState.get('duration')} months</p>
         </div>
     `;
 }
 
 function exportPlan() {
-    const modules = DATA.scopeModules[state.industry];
+    const modules = DATA.scopeModules[appState.get('industry')];
     const selectedModulesArr = [];
-    state.selectedModules.forEach(idx => {
+    appState.get('selectedModules').forEach(idx => {
         if (modules[idx]) selectedModulesArr.push(modules[idx]);
     });
 
     const plan = {
-        industry: state.industry,
+        industry: appState.get('industry'),
         generatedAt: new Date().toISOString(),
-        generatedFrom: state.generatedFrom,
-        scope: { modules: selectedModulesArr, totalModules: state.selectedModules.size, complexity: document.getElementById('complexityLevel')?.textContent || '—' },
-        team: { size: state.teamSize, roles: DATA.teamRoles[state.teamSize], totalHeadcount: DATA.teamRoles[state.teamSize].reduce((s, r) => s + r.count, 0) },
-        financials: { duration: state.duration + ' months', totalInvestment: document.getElementById('totalCost')?.textContent || '$0', implementation: document.getElementById('implCost')?.textContent || '$0', technology: document.getElementById('techCost')?.textContent || '$0', changeManagement: document.getElementById('changeCost')?.textContent || '$0', support: document.getElementById('supportCost')?.textContent || '$0' },
+        generatedFrom: appState.get('generatedFrom'),
+        scope: { modules: selectedModulesArr, totalModules: appState.get('selectedModules').size, complexity: document.getElementById('complexityLevel')?.textContent || '—' },
+        team: { size: appState.get('teamSize'), roles: DATA.teamRoles[appState.get('teamSize')], totalHeadcount: DATA.teamRoles[appState.get('teamSize')].reduce((s, r) => s + r.count, 0) },
+        financials: { duration: appState.get('duration') + ' months', totalInvestment: document.getElementById('totalCost')?.textContent || '$0', implementation: document.getElementById('implCost')?.textContent || '$0', technology: document.getElementById('techCost')?.textContent || '$0', changeManagement: document.getElementById('changeCost')?.textContent || '$0', support: document.getElementById('supportCost')?.textContent || '$0' },
         roi: { threeYearROI: document.getElementById('roiPercent')?.textContent || '0%', paybackMonths: document.getElementById('paybackMonths')?.textContent || '0', annualSavings: document.getElementById('annualSavings')?.textContent || '$0', fteHoursSaved: document.getElementById('fteReduction')?.textContent || '0' },
-        timeline: DATA.phases[state.industry]
+        timeline: DATA.phases[appState.get('industry')]
     };
 
     const blob = new Blob([JSON.stringify(plan, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `fpa-automation-plan-${state.industry}-${Date.now()}.json`;
+    a.download = `fpa-automation-plan-${appState.get('industry')}-${Date.now()}.json`;
     a.click();
     URL.revokeObjectURL(url);
 }
