@@ -139,14 +139,14 @@ function showGeneratedFromBanner(name) {
     const nameEl = document.getElementById('generatedFromName');
     if (banner && nameEl) {
         nameEl.textContent = name;
-        banner.style.display = 'flex';
+        banner.classList.remove('hidden');
     }
 }
 
 function hideGeneratedFromBanner() {
     const banner = document.getElementById('generatedFromBanner');
     if (banner) {
-        banner.style.display = 'none';
+        banner.classList.add('hidden');
     }
 }
 
@@ -579,12 +579,9 @@ function applyPreset(preset) {
 
     setTeamSize(p.teamSize);
     renderScopeModules();
+    renderTechStack();
     updateCosts();
     renderExportSummary();
-
-    document.querySelectorAll('[data-preset]').forEach(btn => {
-        btn.classList.toggle('active', btn.getAttribute('data-preset') === preset);
-    });
 }
 
 // ----------------------------------------------------------
@@ -592,9 +589,6 @@ function applyPreset(preset) {
 // ----------------------------------------------------------
 function setTeamSize(size) {
     state.teamSize = size;
-    document.querySelectorAll('[data-team-size]').forEach(btn => {
-        btn.classList.toggle('active', btn.getAttribute('data-team-size') === size);
-    });
     renderTeamRoster();
 
     // Update costs based on pricing mode
@@ -604,6 +598,8 @@ function setTeamSize(size) {
     } else {
         updateCosts();
     }
+    renderScopeModules();
+    renderTechStack();
     renderExportSummary();
 }
 
@@ -1169,10 +1165,10 @@ function exportPlan() {
         industry: state.industry,
         generatedAt: new Date().toISOString(),
         generatedFrom: state.generatedFrom,
-        scope: { modules: selectedModulesArr, totalModules: state.selectedModules.size, complexity: document.getElementById('complexityLevel').textContent },
+        scope: { modules: selectedModulesArr, totalModules: state.selectedModules.size, complexity: document.getElementById('complexityLevel')?.textContent || '—' },
         team: { size: state.teamSize, roles: DATA.teamRoles[state.teamSize], totalHeadcount: DATA.teamRoles[state.teamSize].reduce((s, r) => s + r.count, 0) },
-        financials: { duration: state.duration + ' months', totalInvestment: document.getElementById('totalCost').textContent, implementation: document.getElementById('implCost').textContent, technology: document.getElementById('techCost').textContent, changeManagement: document.getElementById('changeCost').textContent, support: document.getElementById('supportCost').textContent },
-        roi: { threeYearROI: document.getElementById('roiPercent').textContent, paybackMonths: document.getElementById('paybackMonths').textContent, annualSavings: document.getElementById('annualSavings').textContent, fteHoursSaved: document.getElementById('fteReduction').textContent },
+        financials: { duration: state.duration + ' months', totalInvestment: document.getElementById('totalCost')?.textContent || '$0', implementation: document.getElementById('implCost')?.textContent || '$0', technology: document.getElementById('techCost')?.textContent || '$0', changeManagement: document.getElementById('changeCost')?.textContent || '$0', support: document.getElementById('supportCost')?.textContent || '$0' },
+        roi: { threeYearROI: document.getElementById('roiPercent')?.textContent || '0%', paybackMonths: document.getElementById('paybackMonths')?.textContent || '0', annualSavings: document.getElementById('annualSavings')?.textContent || '$0', fteHoursSaved: document.getElementById('fteReduction')?.textContent || '0' },
         timeline: DATA.phases[state.industry]
     };
 
@@ -1183,6 +1179,11 @@ function exportPlan() {
     a.download = `fpa-automation-plan-${state.industry}-${Date.now()}.json`;
     a.click();
     URL.revokeObjectURL(url);
+}
+
+// Alias for HTML onclick
+function exportJSON() {
+    exportPlan();
 }
 
 // ----------------------------------------------------------

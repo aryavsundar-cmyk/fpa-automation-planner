@@ -176,6 +176,13 @@
         </div>
     </section>
 
+    <!-- Generated From Banner -->
+    <div id="generatedFromBanner" class="hidden bg-indigo-500/20 border border-indigo-500/30 px-4 sm:px-6 lg:px-8 py-4 max-w-7xl mx-auto mb-4">
+        <div class="text-sm text-indigo-300">
+            <span class="font-semibold">✓ Configuration Generated</span> from use case: <span id="generatedFromName" class="font-bold text-indigo-100">Revenue Forecasting</span>
+        </div>
+    </div>
+
     <!-- Scope & Team Section -->
     <section id="scope" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
@@ -338,6 +345,64 @@
             </div>
             <div id="timelineContainer" class="space-y-8">
                 <!-- Populated by JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Project Summary Section -->
+    <section id="summary" class="bg-slate-900/50 px-4 sm:px-6 lg:px-8 py-24 border-y border-slate-800/50">
+        <div class="max-w-7xl mx-auto">
+            <div class="mb-12">
+                <div class="inline-block mb-4">
+                    <span class="badge badge-indigo">PROJECT SUMMARY</span>
+                </div>
+                <h2 class="section-title">Configuration Overview</h2>
+                <p class="section-subtitle">Here's a snapshot of your current project configuration.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                <div class="bg-slate-900/50 rounded-lg border border-slate-800 p-6">
+                    <div class="text-sm text-slate-400 mb-2">Module Count</div>
+                    <div id="moduleCount" class="text-3xl font-bold text-indigo-400">0</div>
+                    <div class="text-xs text-slate-500 mt-2">modules selected</div>
+                </div>
+                <div class="bg-slate-900/50 rounded-lg border border-slate-800 p-6">
+                    <div class="text-sm text-slate-400 mb-2">Integrations</div>
+                    <div id="integrationCount" class="text-3xl font-bold text-violet-400">0</div>
+                    <div class="text-xs text-slate-500 mt-2">total integrations</div>
+                </div>
+                <div class="bg-slate-900/50 rounded-lg border border-slate-800 p-6">
+                    <div class="text-sm text-slate-400 mb-2">Complexity</div>
+                    <div id="complexityLevel" class="text-3xl font-bold text-amber-400">—</div>
+                    <div class="text-xs text-slate-500 mt-2">project complexity</div>
+                </div>
+                <div class="bg-slate-900/50 rounded-lg border border-slate-800 p-6">
+                    <div class="text-sm text-slate-400 mb-2">Generated</div>
+                    <div id="proposalDate" class="text-sm font-medium text-slate-300">Today</div>
+                    <div class="text-xs text-slate-500 mt-2">configuration date</div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+                <div class="lg:col-span-2 bg-slate-900/50 rounded-lg border border-slate-800 p-6">
+                    <h3 class="text-slate-100 font-bold text-lg mb-4">Your Configuration</h3>
+                    <div id="exportSummary" class="space-y-4">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+                <div class="bg-slate-900/50 rounded-lg border border-slate-800 p-6">
+                    <h3 class="text-slate-100 font-bold text-lg mb-4">Team Allocation</h3>
+                    <div id="allocationBars" class="space-y-3">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-900/50 rounded-lg border border-slate-800 p-6 mb-12">
+                <h3 class="text-slate-100 font-bold text-lg mb-4">Deliverables Timeline</h3>
+                <div id="deliverablesTable" class="space-y-2">
+                    <!-- Populated by JS -->
+                </div>
             </div>
         </div>
     </section>
