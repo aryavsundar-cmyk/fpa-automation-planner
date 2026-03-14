@@ -7,8 +7,6 @@ let state = {
     selectedModules: new Set(),
     teamSize: 'medium',
     duration: 9,
-    deliveryModel: 'onshore',
-    licenseModel: 'saas',
     generatedFrom: null,
     expandedModules: new Set()
 };
@@ -216,12 +214,7 @@ function scoreAndFilterTechStack() {
             score += 0.2;
         }
 
-        // 3. Check delivery model compatibility
-        if (tech.deliveryModels && tech.deliveryModels.includes(state.deliveryModel)) {
-            score += 0.1;
-        }
-
-        // 4. Criticality boost
+        // 3. Criticality boost
         if (tech.criticality === 'Critical') {
             score += 0.2;
         }
@@ -523,57 +516,38 @@ function renderTeamRoster() {
 // ----------------------------------------------------------
 // COST CALCULATOR
 // ----------------------------------------------------------
-function setDeliveryModel(model) {
-    state.deliveryModel = model;
-    document.querySelectorAll('.delivery-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.model === model);
-    });
-    updateCosts();
-    renderExportSummary();
-    renderTechStack(); // Re-render tech stack based on delivery model
-}
-
-function setLicenseModel(model) {
-    state.licenseModel = model;
-    document.querySelectorAll('.license-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.license === model);
-    });
-    updateCosts();
-    renderExportSummary();
-}
 
 function updateCosts() {
     const duration = parseInt(document.getElementById('durationSlider').value);
     state.duration = duration;
     document.getElementById('durationDisplay').textContent = `${duration} months`;
 
-    const roles = DATA.teamRoles[state.teamSize];
-    const deliveryMult = DATA.costMultipliers.delivery[state.deliveryModel];
-    const licenseCfg = DATA.costMultipliers.license[state.licenseModel];
     const moduleCount = state.selectedModules.size;
+    const pricing = DATA.pricing;
 
-    const monthlyTeamCost = roles.reduce((sum, r) => sum + (r.count * r.rate * 160), 0);
-    const implCost = Math.round(monthlyTeamCost * duration * deliveryMult);
+    // Base implementation cost for the team size
+    const implCost = pricing.implementation[state.teamSize];
 
-    let techCost;
-    if (state.licenseModel === 'onprem') {
-        techCost = licenseCfg.base + (moduleCount * licenseCfg.perModule);
-    } else {
-        techCost = (licenseCfg.base + (moduleCount * licenseCfg.perModule)) * duration;
-    }
-    techCost = Math.round(techCost);
+    // Technology cost per module (one-time)
+    const techCost = moduleCount * pricing.perModule;
 
-    const changeCost = Math.round(implCost * 0.12);
-    const supportCost = Math.round((implCost / duration * 12) * 0.18);
-    const totalCost = implCost + techCost + changeCost;
+    // Change management cost based on team size
+    const changeCost = pricing.changeManagement[state.teamSize];
+
+    // Monthly support cost across project duration
+    const supportCost = pricing.supportPerMonth * duration;
+
+    // Total project investment
+    const totalCost = implCost + techCost + changeCost + supportCost;
 
     document.getElementById('implCost').textContent = formatCurrency(implCost);
     document.getElementById('techCost').textContent = formatCurrency(techCost);
     document.getElementById('changeCost').textContent = formatCurrency(changeCost);
-    document.getElementById('supportCost').textContent = formatCurrency(supportCost) + '/yr';
+    document.getElementById('supportCost').textContent = formatCurrency(supportCost);
     document.getElementById('totalCost').textContent = formatCurrency(totalCost);
-    document.getElementById('totalCostRange').textContent = `Range: ${formatCurrency(Math.round(totalCost * 0.85))} — ${formatCurrency(Math.round(totalCost * 1.2))}`;
+    document.getElementById('totalCostRange').textContent = `Range: ${formatCurrency(Math.round(totalCost * 0.90))} — ${formatCurrency(Math.round(totalCost * 1.15))}`;
 
+    // ROI calculations based on module count and team size
     const annualSavings = Math.round(moduleCount * 125000 + (state.teamSize === 'large' ? 500000 : state.teamSize === 'medium' ? 250000 : 100000));
     const threeYearROI = Math.round(((annualSavings * 3 - totalCost) / totalCost) * 100);
     const paybackMonths = Math.round(totalCost / (annualSavings / 12));
@@ -685,7 +659,6 @@ function getProposalConfig() {
         teamSizeLabel: state.teamSize.charAt(0).toUpperCase() + state.teamSize.slice(1),
         headcount,
         duration: state.duration,
-        deliveryModel: state.deliveryModel,
         complexity,
         totalCost: document.getElementById('totalCost').textContent,
         implCost: document.getElementById('implCost').textContent,
@@ -740,7 +713,7 @@ function generateProposal() {
     // Team Composition
     html += `<div class="proposal-section">
         <h3>Team Composition</h3>
-        <div class="proposal-text"><strong>${c.teamSizeLabel} team</strong> of <strong>${c.headcount} FTEs</strong> with ${c.deliveryModel} delivery model.</div>
+        <div class="proposal-text"><strong>${c.teamSizeLabel} team</strong> of <strong>${c.headcount} FTEs</strong> over <strong>${c.duration} months</strong>.</div>
         <table class="proposal-team-table">
             <thead><tr><th>Role</th><th>Count</th><th>Focus</th></tr></thead>
             <tbody>${c.roles.map(r => `<tr><td>${r.role}</td><td>${r.count}</td><td>${r.responsibilities}</td></tr>`).join('')}</tbody>
@@ -818,7 +791,7 @@ function prepareGammaExport() {
     payload += `### Selected Modules (${c.moduleCount})\n`;
     c.moduleNames.forEach(n => payload += `- ${n}\n`);
     payload += `\n## Implementation Approach\n${approachText}\n\n`;
-    payload += `## Team\n- Size: ${c.teamSizeLabel} (${c.headcount} FTEs)\n- Model: ${c.deliveryModel}\n- Duration: ${c.duration} months\n\n`;
+    payload += `## Team\n- Size: ${c.teamSizeLabel} (${c.headcount} FTEs)\n- Duration: ${c.duration} months\n\n`;
     payload += `## Investment\n- Implementation: ${c.implCost}\n- Technology: ${c.techCost}\n- Change Management: ${c.changeCost}\n- **Total: ${c.totalCost}**\n\n`;
     payload += `## ROI Projection\n- 3-Year ROI: ${c.roiPercent}\n- Payback: ${c.paybackMonths} months\n- Annual Savings: ${c.annualSavings}\n- FTE Hours Saved: ${c.fteHoursSaved}/yr\n\n`;
     payload += `## Timeline\n`;
@@ -883,14 +856,6 @@ function renderExportSummary() {
             <h4>Duration</h4>
             <p>${state.duration} months</p>
         </div>
-        <div class="export-section">
-            <h4>Delivery Model</h4>
-            <p>${state.deliveryModel.charAt(0).toUpperCase() + state.deliveryModel.slice(1)}</p>
-        </div>
-        <div class="export-section">
-            <h4>License Model</h4>
-            <p>${state.licenseModel === 'saas' ? 'SaaS' : state.licenseModel === 'onprem' ? 'On-Premises' : 'Hybrid Cloud'}</p>
-        </div>
     `;
 }
 
@@ -907,7 +872,7 @@ function exportPlan() {
         generatedFrom: state.generatedFrom,
         scope: { modules: selectedModulesArr, totalModules: state.selectedModules.size, complexity: document.getElementById('complexityLevel').textContent },
         team: { size: state.teamSize, roles: DATA.teamRoles[state.teamSize], totalHeadcount: DATA.teamRoles[state.teamSize].reduce((s, r) => s + r.count, 0) },
-        financials: { duration: state.duration + ' months', deliveryModel: state.deliveryModel, licenseModel: state.licenseModel, totalInvestment: document.getElementById('totalCost').textContent, implementation: document.getElementById('implCost').textContent, technology: document.getElementById('techCost').textContent, changeManagement: document.getElementById('changeCost').textContent, annualSupport: document.getElementById('supportCost').textContent },
+        financials: { duration: state.duration + ' months', totalInvestment: document.getElementById('totalCost').textContent, implementation: document.getElementById('implCost').textContent, technology: document.getElementById('techCost').textContent, changeManagement: document.getElementById('changeCost').textContent, support: document.getElementById('supportCost').textContent },
         roi: { threeYearROI: document.getElementById('roiPercent').textContent, paybackMonths: document.getElementById('paybackMonths').textContent, annualSavings: document.getElementById('annualSavings').textContent, fteHoursSaved: document.getElementById('fteReduction').textContent },
         timeline: DATA.phases[state.industry]
     };

@@ -964,13 +964,20 @@ const DATA = {
     // ----------------------------------------------------------
     // COST MULTIPLIERS
     // ----------------------------------------------------------
-    costMultipliers: {
-        delivery: { onshore: 1.0, hybrid: 0.72, offshore: 0.45 },
-        license: {
-            saas: { base: 15000, perModule: 8000, label: "Monthly SaaS" },
-            onprem: { base: 250000, perModule: 75000, label: "Perpetual License" },
-            hybrid: { base: 20000, perModule: 10000, label: "Hybrid Cloud Monthly" }
-        }
+    // Simplified pricing: Base implementation + per-module technology costs (no delivery/license multipliers)
+    pricing: {
+        implementation: {
+            small: 150000,      // Small team base implementation cost
+            medium: 300000,     // Medium team base implementation cost
+            large: 500000       // Large team base implementation cost
+        },
+        perModule: 25000,       // Technology cost per scope module selected
+        changeManagement: {
+            small: 50000,
+            medium: 100000,
+            large: 150000
+        },
+        supportPerMonth: 15000  // Monthly support/licensing cost
     },
 
     // ----------------------------------------------------------

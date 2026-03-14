@@ -245,24 +245,8 @@
                     <div class="cost-control-group">
                         <label>Project Duration</label>
                         <div class="duration-slider">
-                            <input type="range" min="3" max="24" value="9" id="durationSlider" oninput="updateCosts()">
+                            <input type="range" min="2" max="24" value="9" id="durationSlider" oninput="updateCosts()">
                             <span class="duration-display" id="durationDisplay">9 months</span>
-                        </div>
-                    </div>
-                    <div class="cost-control-group">
-                        <label>Delivery Model</label>
-                        <div class="delivery-options">
-                            <button class="delivery-btn active" data-model="onshore" onclick="setDeliveryModel('onshore')">Onshore</button>
-                            <button class="delivery-btn" data-model="hybrid" onclick="setDeliveryModel('hybrid')">Hybrid</button>
-                            <button class="delivery-btn" data-model="offshore" onclick="setDeliveryModel('offshore')">Offshore</button>
-                        </div>
-                    </div>
-                    <div class="cost-control-group">
-                        <label>Licensing Model</label>
-                        <div class="delivery-options">
-                            <button class="license-btn active" data-license="saas" onclick="setLicenseModel('saas')">SaaS</button>
-                            <button class="license-btn" data-license="onprem" onclick="setLicenseModel('onprem')">On-Prem</button>
-                            <button class="license-btn" data-license="hybrid" onclick="setLicenseModel('hybrid')">Hybrid Cloud</button>
                         </div>
                     </div>
                 </div>
