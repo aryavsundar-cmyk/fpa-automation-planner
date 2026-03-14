@@ -33,13 +33,21 @@ function setIndustry(industry) {
     state.expandedModules = new Set();
     hideGeneratedFromBanner();
 
-    document.querySelectorAll('.toggle-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.industry === industry);
-    });
+    // Update toggle buttons using specific IDs
+    const agencyBtn = document.getElementById('agencyBtn');
+    const publisherBtn = document.getElementById('publisherBtn');
 
-    document.getElementById('heroIndustryText').textContent = DATA.context[industry].heroText;
-    document.getElementById('heroSubtitle').textContent = DATA.context[industry].heroSubtitle;
-    document.getElementById('useCaseIndustryLabel').textContent = industry === 'agency' ? 'Agencies' : 'Publishers';
+    if (agencyBtn) agencyBtn.classList.toggle('active', industry === 'agency');
+    if (publisherBtn) publisherBtn.classList.toggle('active', industry === 'publisher');
+
+    const heroText = document.getElementById('heroIndustryText');
+    if (heroText) heroText.textContent = DATA.context[industry].heroText;
+
+    const heroSubtitle = document.getElementById('heroSubtitle');
+    if (heroSubtitle) heroSubtitle.textContent = DATA.context[industry].heroSubtitle;
+
+    const useCaseLabel = document.getElementById('useCaseIndustryLabel');
+    if (useCaseLabel) useCaseLabel.textContent = industry === 'agency' ? 'Agencies' : 'Publishers';
 
     renderContextBanner();
     renderUseCases();
@@ -56,13 +64,13 @@ function setIndustry(industry) {
 // ----------------------------------------------------------
 function renderContextBanner() {
     const items = DATA.context[state.industry].contextItems;
-    const grid = document.getElementById('contextGrid');
-    grid.innerHTML = items.map(item => `
-        <div class="context-item">
-            <span class="context-icon">${item.icon}</span>
-            <div class="context-text">
-                <span class="context-label">${item.label}</span>
-                <span class="context-value">${item.value}</span>
+    const banner = document.getElementById('contextBanner');
+    banner.innerHTML = items.map(item => `
+        <div class="flex flex-col items-center gap-2 p-4 bg-slate-800/30 rounded-lg border border-slate-700">
+            <span class="text-2xl">${item.icon}</span>
+            <div class="text-center">
+                <span class="block text-slate-400 text-sm">${item.label}</span>
+                <span class="block text-slate-100 font-semibold">${item.value}</span>
             </div>
         </div>
     `).join('');
@@ -73,25 +81,30 @@ function renderContextBanner() {
 // ----------------------------------------------------------
 function renderUseCases() {
     const cases = DATA.useCases[state.industry];
-    const grid = document.getElementById('useCaseGrid');
+    const grid = document.getElementById('useCasesGrid');
     grid.innerHTML = cases.map((uc, i) => `
-        <div class="use-case-card" style="animation-delay: ${i * 0.05}s" onclick="selectUseCaseProject(${i})">
-            <div class="uc-header">
-                <span class="uc-icon">${uc.icon}</span>
-                <span class="uc-complexity complexity-${uc.complexity}">${uc.complexity}</span>
+        <div class="rounded-lg border border-slate-800 p-6 hover:border-slate-700 transition-colors bg-slate-900/50 cursor-pointer hover:bg-slate-700/50 hover:shadow-lg hover:shadow-slate-900/50 transition-all" style="animation-delay: ${i * 0.05}s" onclick="selectUseCaseProject(${i})">
+            <div class="flex justify-between items-start gap-4 mb-4">
+                <span class="text-3xl">${uc.icon}</span>
+                <span class="inline-block px-3 py-1 rounded-full text-sm font-medium ${
+                    uc.complexity === 'Low' ? 'bg-green-500/20 text-green-300' :
+                    uc.complexity === 'Medium' ? 'bg-yellow-500/20 text-yellow-300' :
+                    uc.complexity === 'High' ? 'bg-orange-500/20 text-orange-300' :
+                    'bg-red-500/20 text-red-300'
+                }">${uc.complexity}</span>
             </div>
-            <h3 class="uc-title">${uc.title}</h3>
-            <p class="uc-desc">${uc.description}</p>
-            <div class="uc-section">
-                <h4 class="uc-section-title pain-title">Pain Points</h4>
-                <ul class="uc-list">${uc.painPoints.map(p => `<li>${p}</li>`).join('')}</ul>
+            <h3 class="text-slate-100 font-bold text-lg mb-2">${uc.title}</h3>
+            <p class="text-slate-400 text-sm mb-4">${uc.description}</p>
+            <div class="mb-4">
+                <h4 class="text-slate-300 text-sm font-semibold mb-2">Pain Points</h4>
+                <ul class="list-disc list-inside text-slate-400 text-sm space-y-1">${uc.painPoints.map(p => `<li>${p}</li>`).join('')}</ul>
             </div>
-            <div class="uc-section">
-                <h4 class="uc-section-title value-title">Automation Value</h4>
-                <ul class="uc-list">${uc.automationValue.map(v => `<li>${v}</li>`).join('')}</ul>
+            <div class="mb-4">
+                <h4 class="text-slate-300 text-sm font-semibold mb-2">Automation Value</h4>
+                <ul class="list-disc list-inside text-slate-400 text-sm space-y-1">${uc.automationValue.map(v => `<li>${v}</li>`).join('')}</ul>
             </div>
-            <div class="uc-kpis">
-                ${uc.kpis.map(k => `<span class="kpi-tag">${k}</span>`).join('')}
+            <div class="flex flex-wrap gap-2">
+                ${uc.kpis.map(k => `<span class="inline-block px-3 py-1 rounded-full text-xs font-medium bg-indigo-500/20 text-indigo-300">${k}</span>`).join('')}
             </div>
         </div>
     `).join('');
@@ -123,12 +136,18 @@ function selectUseCaseProject(idx) {
 
 function showGeneratedFromBanner(name) {
     const banner = document.getElementById('generatedFromBanner');
-    document.getElementById('generatedFromName').textContent = name;
-    banner.style.display = 'flex';
+    const nameEl = document.getElementById('generatedFromName');
+    if (banner && nameEl) {
+        nameEl.textContent = name;
+        banner.classList.remove('hidden');
+    }
 }
 
 function hideGeneratedFromBanner() {
-    document.getElementById('generatedFromBanner').style.display = 'none';
+    const banner = document.getElementById('generatedFromBanner');
+    if (banner) {
+        banner.classList.add('hidden');
+    }
 }
 
 function clearGeneratedFrom() {
@@ -141,19 +160,36 @@ function clearGeneratedFrom() {
 // ----------------------------------------------------------
 function renderArchitecture() {
     const arch = DATA.architecture[state.industry];
-    const layerLabels = { sources: 'Data Sources', platform: 'Data Platform', apps: 'Application Layer', outputs: 'Outputs' };
+    const archContainer = document.getElementById('archContainer');
+
+    const layerLabels = {
+        sources: 'Data Sources',
+        platform: 'Data Platform',
+        apps: 'Application Layer',
+        outputs: 'Outputs'
+    };
+
+    let html = '';
 
     ['sources', 'platform', 'apps', 'outputs'].forEach(layer => {
-        const capitalizedId = 'arch' + layer.charAt(0).toUpperCase() + layer.slice(1);
-        const el = document.getElementById(capitalizedId);
-        el.innerHTML = arch[layer].map((item, idx) => `
-            <div class="arch-item" onclick="openArchDetail('${layer}', ${idx})">
-                <span class="arch-item-name">${item.name}</span>
-                <span class="arch-item-sub">${item.sub}</span>
+        html += `
+            <div class="space-y-6 mb-6">
+                <div class="bg-slate-800/30 rounded-lg border border-slate-700 p-4">
+                    <h4 class="text-slate-100 font-semibold mb-4">${layerLabels[layer]}</h4>
+                    <div class="space-y-2">
+                        ${arch[layer].map((item, idx) => `
+                            <div class="rounded-lg border border-slate-700/50 p-3 hover:bg-slate-700/50 cursor-pointer transition-colors" onclick="openArchDetail('${layer}', ${idx})">
+                                <span class="block text-slate-100 font-medium">${item.name}</span>
+                                <span class="block text-slate-400 text-sm">${item.sub}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
             </div>
-        `).join('');
+        `;
     });
 
+    archContainer.innerHTML = html;
     renderTechStack();
 }
 
@@ -168,18 +204,24 @@ function renderTechStack() {
         const borderColor = score >= 0.8 ? '#7c5cff' : score >= 0.5 ? '#4f46e5' : '#6b7280';
 
         return `
-            <div class="tech-card tech-card-${tech.criticality.toLowerCase()}"
-                 style="opacity: ${opacity}; border-color: ${borderColor};"
+            <div class="rounded-lg border border-slate-800 p-4 hover:border-slate-700 transition-colors bg-slate-900/50 cursor-pointer hover:bg-slate-700/50 hover:shadow-lg hover:shadow-slate-900/50 transition-all"
+                 style="opacity: ${opacity};"
                  onclick="openTechDetail(${idx})">
-                <div class="tech-relevance-badge" style="width: ${scorePercent}%; background: ${borderColor};"></div>
-                <div class="tech-card-header">
-                    <span class="tech-category">${tech.category}</span>
-                    <span class="tech-criticality-badge ${tech.criticality.toLowerCase()}">${tech.criticality}</span>
+                <div style="height: 3px; background: ${borderColor}; border-radius: 2px; width: ${scorePercent}%; margin-bottom: 1rem;"></div>
+                <div class="flex justify-between items-start gap-2 mb-3">
+                    <span class="text-slate-300 text-sm font-medium">${tech.category}</span>
+                    <span class="inline-block px-2 py-1 rounded text-xs font-medium ${
+                        tech.criticality === 'Critical' ? 'bg-red-500/20 text-red-300' :
+                        tech.criticality === 'Optional' ? 'bg-slate-500/20 text-slate-300' :
+                        'bg-blue-500/20 text-blue-300'
+                    }">${tech.criticality}</span>
                 </div>
-                <span class="tech-recommended">${tech.recommended}</span>
-                <div class="tech-options">${tech.options.map(o => `<span class="tech-option">${o}</span>`).join('')}</div>
-                ${matchedModules.length > 0 ? `<div class="tech-modules-matched">${matchedModules.length} module${matchedModules.length !== 1 ? 's' : ''}</div>` : ''}
-                <div class="tech-click-hint">↗ Click for details</div>
+                <span class="block text-slate-100 font-semibold mb-3">${tech.recommended}</span>
+                <div class="flex flex-wrap gap-2 mb-3">
+                    ${tech.options.map(o => `<span class="inline-block px-2 py-1 rounded text-xs bg-slate-700/50 text-slate-300">${o}</span>`).join('')}
+                </div>
+                ${matchedModules.length > 0 ? `<div class="text-slate-400 text-xs">${matchedModules.length} module${matchedModules.length !== 1 ? 's' : ''}</div>` : ''}
+                <div class="text-slate-500 text-xs mt-3">↗ Click for details</div>
             </div>
         `;
     }).join('');
@@ -244,46 +286,94 @@ function openTechDetail(idx) {
     const modules = DATA.scopeModules[state.industry];
 
     const moduleList = matchedModules.map(modIdx =>
-        `<li><strong>${modules[modIdx]?.name || 'Unknown'}</strong> — ${modules[modIdx]?.description || ''}</li>`
+        `<li><strong>${modules[modIdx]?.name || 'Unknown'}</strong></li>`
     ).join('');
 
     const architectureConnections = tech.architectureLayers
         ? tech.architectureLayers.map(layer => {
             const layerNames = { 'sources': 'Data Sources', 'platform': 'Data Platform', 'apps': 'Application Layer', 'outputs': 'Outputs' };
-            return `<span class="arch-connection-tag">${layerNames[layer]}</span>`;
+            return `<span class="inline-block px-3 py-1 rounded-full text-xs font-medium bg-indigo-500/20 text-indigo-300">${layerNames[layer]}</span>`;
         }).join('')
         : '';
 
     const scorePercent = Math.round(score * 100);
+    const borderColor = scorePercent >= 80 ? 'indigo-500' : scorePercent >= 50 ? 'indigo-400' : 'slate-500';
 
-    document.getElementById('techDetailCategory').textContent = tech.category;
-    document.getElementById('techDetailRecommended').textContent = tech.recommended;
-    document.getElementById('techDetailCriticality').textContent = tech.criticality;
-    document.getElementById('techDetailRelevanceBar').style.width = scorePercent + '%';
-    document.getElementById('techDetailRelevancePercent').textContent = scorePercent + '%';
-    document.getElementById('techDetailRelevancePercent').parentElement.style.borderColor = scorePercent >= 80 ? '#7c5cff' : scorePercent >= 50 ? '#4f46e5' : '#6b7280';
+    const html = `
+        <div>
+            <h3 class="text-slate-100 font-bold text-2xl mb-2">${tech.recommended}</h3>
+            <div class="flex gap-4 mb-4 flex-wrap">
+                <div>
+                    <span class="text-slate-400 text-xs">Category</span>
+                    <p class="text-slate-100 font-medium">${tech.category}</p>
+                </div>
+                <div>
+                    <span class="text-slate-400 text-xs">Criticality</span>
+                    <p class="text-slate-100 font-medium">${tech.criticality}</p>
+                </div>
+            </div>
 
-    document.getElementById('techDetailOptions').innerHTML = tech.options
-        .map(o => `<span class="tech-option">${o}</span>`).join('');
+            <div class="mb-4">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-slate-400 text-sm">Relevance</span>
+                    <span class="text-slate-100 font-semibold">${scorePercent}%</span>
+                </div>
+                <div class="h-2 bg-slate-800 rounded-full overflow-hidden border-2" style="border-color: var(--tw-${borderColor}-500)">
+                    <div class="h-full" style="width: ${scorePercent}%; background: currentColor;" class="bg-indigo-500"></div>
+                </div>
+            </div>
 
-    document.getElementById('techDetailReason').innerHTML = `
-        <p><strong>Why for your project:</strong> ${tech.reason}</p>
-        <p><strong>Cost impact:</strong> ${tech.costImpact}</p>
-        ${matchedModules.length > 0 ? `
-            <p><strong>Used by your selected modules (${matchedModules.length}):</strong></p>
-            <ul style="margin: 0.5rem 0 0 1.5rem; padding: 0; font-size: 0.9rem;">${moduleList}</ul>
-        ` : '<p style="color: #9ca3af; font-style: italic;">Not directly used by your selected modules, but part of the recommended foundation.</p>'}
+            <div class="mb-4">
+                <h4 class="text-slate-300 font-semibold mb-2">Options</h4>
+                <div class="flex flex-wrap gap-2">
+                    ${tech.options.map(o => `<span class="inline-block px-2 py-1 rounded text-xs bg-slate-700/50 text-slate-300">${o}</span>`).join('')}
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <h4 class="text-slate-300 font-semibold mb-2">Why This Technology</h4>
+                <p class="text-slate-400 text-sm mb-2">${tech.reason}</p>
+                <p class="text-slate-400 text-sm"><strong>Cost impact:</strong> ${tech.costImpact}</p>
+            </div>
+
+            ${matchedModules.length > 0 ? `
+                <div class="mb-4">
+                    <h4 class="text-slate-300 font-semibold mb-2">Used by ${matchedModules.length} module(s)</h4>
+                    <ul class="text-slate-400 text-sm space-y-1">${moduleList}</ul>
+                </div>
+            ` : `
+                <div class="mb-4 p-3 rounded bg-slate-800/50 border border-slate-700/50">
+                    <p class="text-slate-400 text-sm italic">Not directly used by your selected modules, but part of the recommended foundation.</p>
+                </div>
+            `}
+
+            ${architectureConnections ? `
+                <div>
+                    <h4 class="text-slate-300 font-semibold mb-2">Architecture Layers</h4>
+                    <div class="flex flex-wrap gap-2">
+                        ${architectureConnections}
+                    </div>
+                </div>
+            ` : ''}
+        </div>
     `;
 
-    document.getElementById('techDetailArchitecture').innerHTML = architectureConnections
-        ? `<p><strong>Architecture layers:</strong></p><div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">${architectureConnections}</div>`
-        : '';
+    const content = document.getElementById('techDetailContent');
+    if (content) {
+        content.innerHTML = html;
+    }
 
-    document.getElementById('techDetailModal').classList.add('active');
+    const modal = document.getElementById('techDetailModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+    }
 }
 
 function closeTechDetail() {
-    document.getElementById('techDetailModal').classList.remove('active');
+    const modal = document.getElementById('techDetailModal');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
 }
 
 function openArchDetail(layer, idx) {
@@ -293,29 +383,63 @@ function openArchDetail(layer, idx) {
 
     const layerLabels = { sources: 'Data Sources', platform: 'Data Platform', apps: 'Application Layer', outputs: 'Outputs' };
 
-    document.getElementById('archModalLayer').textContent = layerLabels[layer];
-    document.getElementById('archModalTitle').textContent = item.name;
-    document.getElementById('archModalSub').textContent = item.sub;
-    document.getElementById('archModalTech').textContent = item.techDescription || 'Technical description not available.';
-    document.getElementById('archModalBusiness').textContent = item.businessDescription || 'Business description not available.';
-    document.getElementById('archModalCurrentName').textContent = item.name;
-
     const upstream = item.connections?.upstream || [];
     const downstream = item.connections?.downstream || [];
 
-    document.getElementById('archModalUpstream').innerHTML = upstream.length > 0
-        ? upstream.map(u => `<span class="conn-tag">${u}</span>`).join('')
-        : '<span class="conn-empty">No upstream sources</span>';
+    const html = `
+        <div>
+            <div class="text-slate-400 text-sm mb-2">${layerLabels[layer]}</div>
+            <h3 class="text-slate-100 font-bold text-2xl mb-2">${item.name}</h3>
+            <p class="text-slate-400 text-sm mb-6">${item.sub}</p>
 
-    document.getElementById('archModalDownstream').innerHTML = downstream.length > 0
-        ? downstream.map(d => `<span class="conn-tag">${d}</span>`).join('')
-        : '<span class="conn-empty">End consumer</span>';
+            <div class="grid grid-cols-2 gap-6 mb-6">
+                <div>
+                    <h4 class="text-slate-300 font-semibold mb-2">Technical Details</h4>
+                    <p class="text-slate-400 text-sm">${item.techDescription || 'Technical description not available.'}</p>
+                </div>
+                <div>
+                    <h4 class="text-slate-300 font-semibold mb-2">Business Impact</h4>
+                    <p class="text-slate-400 text-sm">${item.businessDescription || 'Business description not available.'}</p>
+                </div>
+            </div>
 
-    document.getElementById('archDetailModal').classList.add('active');
+            <div class="grid grid-cols-2 gap-6">
+                <div>
+                    <h4 class="text-slate-300 font-semibold mb-3">Upstream Sources</h4>
+                    <div class="flex flex-wrap gap-2">
+                        ${upstream.length > 0
+                            ? upstream.map(u => `<span class="inline-block px-3 py-1 rounded-full text-xs font-medium bg-indigo-500/20 text-indigo-300">${u}</span>`).join('')
+                            : '<span class="text-slate-400 text-sm">No upstream sources</span>'}
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-slate-300 font-semibold mb-3">Downstream Consumers</h4>
+                    <div class="flex flex-wrap gap-2">
+                        ${downstream.length > 0
+                            ? downstream.map(d => `<span class="inline-block px-3 py-1 rounded-full text-xs font-medium bg-indigo-500/20 text-indigo-300">${d}</span>`).join('')
+                            : '<span class="text-slate-400 text-sm">End consumer</span>'}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    const content = document.getElementById('archDetailContent');
+    if (content) {
+        content.innerHTML = html;
+    }
+
+    const modal = document.getElementById('archDetailModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+    }
 }
 
 function closeArchDetail() {
-    document.getElementById('archDetailModal').classList.remove('active');
+    const modal = document.getElementById('archDetailModal');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
 }
 
 // ----------------------------------------------------------
@@ -323,33 +447,35 @@ function closeArchDetail() {
 // ----------------------------------------------------------
 function renderScopeModules() {
     const modules = DATA.scopeModules[state.industry];
-    const container = document.getElementById('scopeModules');
+    const container = document.getElementById('modulesContainer');
     const categories = { core: 'Core Modules', analytics: 'Analytics Modules', advanced: 'Advanced Modules' };
 
     let html = '';
     Object.entries(categories).forEach(([cat, label]) => {
         const catModules = modules.filter(m => m.category === cat);
-        html += `<div class="module-category">
-            <h3 class="module-cat-title">${label}</h3>
-            <div class="module-list">
+        html += `<div class="mb-8">
+            <h3 class="text-slate-100 font-bold text-lg mb-4">${label}</h3>
+            <div class="space-y-3">
                 ${catModules.map(m => {
                     const globalIdx = modules.indexOf(m);
                     const isSelected = state.selectedModules.has(globalIdx);
                     const isExpanded = state.expandedModules.has(globalIdx);
-                    return `<div class="module-card ${isSelected ? 'selected' : ''} ${isExpanded ? 'detail-expanded' : ''}" onclick="toggleModule(${globalIdx})">
-                        <div class="module-check">${isSelected ? '✓' : ''}</div>
-                        <div class="module-info">
-                            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-                                <span class="module-name">${m.name}</span>
-                                <button class="module-detail-toggle" onclick="toggleModuleDetail(${globalIdx}, event)" title="View details">ℹ</button>
+                    return `<div class="rounded-lg border ${isSelected ? 'border-indigo-600 bg-indigo-500/10' : 'border-slate-800 bg-slate-900/50'} p-4 cursor-pointer hover:border-slate-700 transition-colors" onclick="toggleModule(${globalIdx})">
+                        <div class="flex gap-4">
+                            <div class="flex items-center justify-center w-6 h-6 rounded border ${isSelected ? 'bg-indigo-600 border-indigo-500' : 'border-slate-700'}">${isSelected ? '<span style="color: white; font-weight: bold;">✓</span>' : ''}</div>
+                            <div class="flex-1">
+                                <div class="flex justify-between items-start gap-4 mb-2">
+                                    <span class="text-slate-100 font-semibold">${m.name}</span>
+                                    <button class="text-slate-400 hover:text-slate-200 transition-colors" onclick="toggleModuleDetail(${globalIdx}, event)" title="View details">ℹ</button>
+                                </div>
+                                <span class="block text-slate-400 text-sm mb-3">${m.description}</span>
+                                <div class="flex flex-wrap gap-2 mb-3">
+                                    <span class="inline-block px-2 py-1 rounded text-xs bg-slate-700/50 text-slate-300">Effort: ${m.effort} weeks</span>
+                                    <span class="inline-block px-2 py-1 rounded text-xs bg-slate-700/50 text-slate-300">Integrations: ${m.integrations}</span>
+                                    <span class="inline-block px-2 py-1 rounded text-xs bg-slate-700/50 text-slate-300">Phase ${m.phase}</span>
+                                </div>
+                                ${renderModuleDetailPanel(m, globalIdx, isExpanded)}
                             </div>
-                            <span class="module-desc">${m.description}</span>
-                            <div class="module-meta">
-                                <span class="meta-tag">Effort: ${m.effort} weeks</span>
-                                <span class="meta-tag">Integrations: ${m.integrations}</span>
-                                <span class="meta-tag phase-tag">Phase ${m.phase}</span>
-                            </div>
-                            ${renderModuleDetailPanel(m, globalIdx)}
                         </div>
                     </div>`;
                 }).join('')}
@@ -361,7 +487,9 @@ function renderScopeModules() {
     updateScopeSummary();
 }
 
-function renderModuleDetailPanel(m, idx) {
+function renderModuleDetailPanel(m, idx, isExpanded) {
+    if (!isExpanded) return '';
+
     const deps = m.dependencies && m.dependencies.length > 0
         ? m.dependencies.map(depId => {
             const depMod = DATA.scopeModules[state.industry].find(mod => mod.id === depId);
@@ -369,26 +497,26 @@ function renderModuleDetailPanel(m, idx) {
         })
         : ['None — standalone module'];
 
-    return `<div class="module-detail-panel">
-        ${m.deliverables ? `<div class="detail-section">
-            <div class="detail-section-title dt-deliverables">Key Deliverables</div>
-            <ul class="detail-list">${m.deliverables.map(d => `<li>${d}</li>`).join('')}</ul>
+    return `<div class="border-t border-slate-700/50 pt-3 mt-3 space-y-3">
+        ${m.deliverables ? `<div>
+            <div class="text-slate-300 text-sm font-semibold mb-2">Key Deliverables</div>
+            <ul class="list-disc list-inside text-slate-400 text-sm space-y-1">${m.deliverables.map(d => `<li>${d}</li>`).join('')}</ul>
         </div>` : ''}
-        ${m.requiredSkills ? `<div class="detail-section">
-            <div class="detail-section-title dt-skills">Required Skills</div>
-            <div class="detail-tags">${m.requiredSkills.map(s => `<span class="detail-tag">${s}</span>`).join('')}</div>
+        ${m.requiredSkills ? `<div>
+            <div class="text-slate-300 text-sm font-semibold mb-2">Required Skills</div>
+            <div class="flex flex-wrap gap-2">${m.requiredSkills.map(s => `<span class="inline-block px-2 py-1 rounded text-xs bg-slate-700/50 text-slate-300">${s}</span>`).join('')}</div>
         </div>` : ''}
-        ${m.dependencies ? `<div class="detail-section">
-            <div class="detail-section-title dt-deps">Dependencies</div>
-            <div class="detail-tags">${deps.map(d => `<span class="detail-tag">${d}</span>`).join('')}</div>
+        ${m.dependencies ? `<div>
+            <div class="text-slate-300 text-sm font-semibold mb-2">Dependencies</div>
+            <div class="flex flex-wrap gap-2">${deps.map(d => `<span class="inline-block px-2 py-1 rounded text-xs bg-slate-700/50 text-slate-300">${d}</span>`).join('')}</div>
         </div>` : ''}
-        ${m.successCriteria ? `<div class="detail-section">
-            <div class="detail-section-title dt-success">Success Criteria</div>
-            <ul class="detail-list">${m.successCriteria.map(s => `<li>${s}</li>`).join('')}</ul>
+        ${m.successCriteria ? `<div>
+            <div class="text-slate-300 text-sm font-semibold mb-2">Success Criteria</div>
+            <ul class="list-disc list-inside text-slate-400 text-sm space-y-1">${m.successCriteria.map(s => `<li>${s}</li>`).join('')}</ul>
         </div>` : ''}
-        ${m.riskFactors ? `<div class="detail-section">
-            <div class="detail-section-title dt-risks">Risk Factors</div>
-            <ul class="detail-list">${m.riskFactors.map(r => `<li>${r}</li>`).join('')}</ul>
+        ${m.riskFactors ? `<div>
+            <div class="text-slate-300 text-sm font-semibold mb-2">Risk Factors</div>
+            <ul class="list-disc list-inside text-slate-400 text-sm space-y-1">${m.riskFactors.map(r => `<li>${r}</li>`).join('')}</ul>
         </div>` : ''}
     </div>`;
 }
@@ -412,26 +540,32 @@ function toggleModule(idx) {
     renderScopeModules();
     updateCosts();
     renderExportSummary();
-    renderTechStack(); // Re-render tech stack with new relevance scores
+    renderTechStack();
 }
 
 function updateScopeSummary() {
     const modules = DATA.scopeModules[state.industry];
     const count = state.selectedModules.size;
-    document.getElementById('moduleCount').textContent = count;
+
+    const moduleCountEl = document.getElementById('moduleCount');
+    if (moduleCountEl) moduleCountEl.textContent = count;
 
     let totalIntegrations = 0;
     state.selectedModules.forEach(idx => {
         if (modules[idx]) totalIntegrations += modules[idx].integrations;
     });
-    document.getElementById('integrationCount').textContent = totalIntegrations;
+
+    const integrationCountEl = document.getElementById('integrationCount');
+    if (integrationCountEl) integrationCountEl.textContent = totalIntegrations;
 
     let complexity = '—';
     if (count <= 3) complexity = 'Low';
     else if (count <= 6) complexity = 'Medium';
     else if (count <= 8) complexity = 'High';
     else complexity = 'Enterprise';
-    document.getElementById('complexityLevel').textContent = complexity;
+
+    const complexityLevelEl = document.getElementById('complexityLevel');
+    if (complexityLevelEl) complexityLevelEl.textContent = complexity;
 }
 
 function applyPreset(preset) {
@@ -445,11 +579,9 @@ function applyPreset(preset) {
 
     setTeamSize(p.teamSize);
     renderScopeModules();
+    renderTechStack();
     updateCosts();
     renderExportSummary();
-
-    document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
-    if (event && event.target) event.target.classList.add('active');
 }
 
 // ----------------------------------------------------------
@@ -457,18 +589,17 @@ function applyPreset(preset) {
 // ----------------------------------------------------------
 function setTeamSize(size) {
     state.teamSize = size;
-    document.querySelectorAll('.size-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.size === size);
-    });
     renderTeamRoster();
 
     // Update costs based on pricing mode
     if (state.pricingMode === 'calculator') {
-        state.calculatorRoles = {}; // Reset calculator roles
+        state.calculatorRoles = {};
         initializeCalculator();
     } else {
         updateCosts();
     }
+    renderScopeModules();
+    renderTechStack();
     renderExportSummary();
 }
 
@@ -484,42 +615,50 @@ function renderTeamRoster() {
     categories.forEach(cat => {
         const catRoles = roles.filter(r => r.category === cat);
         if (catRoles.length === 0) return;
-        html += `<div class="roster-category">
-            <h4 class="roster-cat-title" style="border-left: 3px solid ${categoryColors[cat]}; padding-left: 10px;">${categoryLabels[cat]}</h4>
+        html += `<div class="mb-6">
+            <h4 class="text-slate-100 font-semibold mb-3" style="border-left: 3px solid ${categoryColors[cat]}; padding-left: 10px;">${categoryLabels[cat]}</h4>
+            <div class="space-y-2">
             ${catRoles.map(r => `
-                <div class="roster-role">
-                    <div class="role-info">
-                        <span class="role-name">${r.role}</span>
-                        <span class="role-resp">${r.responsibilities}</span>
-                    </div>
-                    <div class="role-meta">
-                        <span class="role-count">${r.count}x</span>
-                        <span class="role-rate">$${r.rate}/hr</span>
+                <div class="rounded-lg border border-slate-800 p-3 bg-slate-900/50 hover:bg-slate-800/50 transition-colors">
+                    <div class="flex justify-between items-start gap-4">
+                        <div>
+                            <span class="block text-slate-100 font-medium">${r.role}</span>
+                            <span class="block text-slate-400 text-sm">${r.responsibilities}</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="block text-slate-100 font-semibold">${r.count}x</span>
+                            <span class="block text-slate-400 text-sm">$${r.rate}/hr</span>
+                        </div>
                     </div>
                 </div>
             `).join('')}
+            </div>
         </div>`;
     });
 
     roster.innerHTML = html;
 
     const allocationBars = document.getElementById('allocationBars');
-    const totalHeadcount = roles.reduce((sum, r) => sum + r.count, 0);
-    const catTotals = {};
-    categories.forEach(cat => {
-        catTotals[cat] = roles.filter(r => r.category === cat).reduce((sum, r) => sum + r.count, 0);
-    });
+    if (allocationBars) {
+        const totalHeadcount = roles.reduce((sum, r) => sum + r.count, 0);
+        const catTotals = {};
+        categories.forEach(cat => {
+            catTotals[cat] = roles.filter(r => r.category === cat).reduce((sum, r) => sum + r.count, 0);
+        });
 
-    allocationBars.innerHTML = categories.map(cat => {
-        const pct = Math.round((catTotals[cat] / totalHeadcount) * 100);
-        return `<div class="alloc-row">
-            <span class="alloc-label">${categoryLabels[cat]}</span>
-            <div class="alloc-bar-container">
-                <div class="alloc-bar" style="width: ${pct}%; background: ${categoryColors[cat]}"></div>
-            </div>
-            <span class="alloc-pct">${pct}%</span>
-        </div>`;
-    }).join('') + `<div class="alloc-total">Total Team: ${totalHeadcount} FTEs</div>`;
+        allocationBars.innerHTML = categories.map(cat => {
+            const pct = Math.round((catTotals[cat] / totalHeadcount) * 100);
+            return `<div class="mb-4">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-slate-400 text-sm">${categoryLabels[cat]}</span>
+                    <span class="text-slate-300 text-sm font-medium">${pct}%</span>
+                </div>
+                <div class="h-2 bg-slate-800 rounded-full overflow-hidden">
+                    <div class="h-full transition-all" style="width: ${pct}%; background: ${categoryColors[cat]}"></div>
+                </div>
+            </div>`;
+        }).join('') + `<div class="text-slate-400 text-sm border-t border-slate-700 pt-4 mt-4">Total Team: ${totalHeadcount} FTEs</div>`;
+    }
 }
 
 // ----------------------------------------------------------
@@ -579,8 +718,8 @@ function setPricingMode(mode) {
     document.getElementById('calculatorPricingBtn').classList.toggle('active', mode === 'calculator');
 
     // Toggle visibility
-    document.getElementById('packagePricingControls').classList.toggle('pricing-calculator-hidden', mode !== 'package');
-    document.getElementById('calculatorPricingControls').classList.toggle('pricing-calculator-hidden', mode !== 'calculator');
+    document.getElementById('packagePricingControls').classList.toggle('hidden', mode !== 'package');
+    document.getElementById('calculatorPricingControls').classList.toggle('hidden', mode !== 'calculator');
 
     // Initialize calculator on first use
     if (mode === 'calculator' && Object.keys(state.calculatorRoles).length === 0) {
@@ -604,14 +743,14 @@ function initializeCalculator() {
         state.calculatorRoles[key] = { selected: false, hoursPerWeek: 40, rate: role.rate, role: role.role };
 
         return `
-            <div class="calculator-role-row">
-                <input type="checkbox" id="calc-role-${key}" onchange="toggleCalculatorRole('${key}')" />
-                <label for="calc-role-${key}" class="calculator-role-name">${role.role}</label>
-                <input type="number" class="calculator-role-input" min="0" max="60" value="40"
+            <div class="flex items-center gap-3 p-3 rounded-lg border border-slate-800 bg-slate-900/50 hover:bg-slate-800/50 transition-colors">
+                <input type="checkbox" id="calc-role-${key}" onchange="toggleCalculatorRole('${key}')" class="w-4 h-4 cursor-pointer" />
+                <label for="calc-role-${key}" class="flex-1 text-slate-100 font-medium cursor-pointer">${role.role}</label>
+                <input type="number" class="w-16 px-2 py-1 rounded border border-slate-700 bg-slate-800 text-slate-100 text-sm" min="0" max="60" value="40"
                        onchange="updateCalculatorRoleHours('${key}', this.value)"
                        placeholder="hrs/wk" />
-                <span style="text-align: center; font-size: 12px; color: var(--text-dim);">$${role.rate}/hr</span>
-                <span class="calculator-role-revenue" id="revenue-${key}">$0</span>
+                <span class="text-slate-400 text-sm w-20 text-right">$${role.rate}/hr</span>
+                <span class="text-slate-100 font-medium w-24 text-right" id="revenue-${key}">$0</span>
             </div>
         `;
     }).join('');
@@ -656,7 +795,7 @@ function updateCalculatorCosts() {
     document.getElementById('totalCostRange').textContent = `Range: ${formatCurrency(Math.round(totalRevenue * 0.90))} — ${formatCurrency(Math.round(totalRevenue * 1.15))}`;
 
     // ROI based on calculator
-    const roiSavings = Math.round(totalRevenue * 0.25); // Assume 25% annual savings
+    const roiSavings = Math.round(totalRevenue * 0.25);
     const threeYearROI = Math.round(((roiSavings * 3 - totalRevenue) / totalRevenue) * 100);
     const paybackMonths = Math.round((totalRevenue / roiSavings) * 12);
 
@@ -680,24 +819,26 @@ function renderTimeline() {
     const container = document.getElementById('timelineContainer');
 
     container.innerHTML = phases.map((phase, pi) => `
-        <div class="timeline-phase">
-            <div class="phase-header" style="border-color: ${phase.color}">
-                <div class="phase-marker" style="background: ${phase.color}">${pi + 1}</div>
-                <div class="phase-title-group">
-                    <h3 class="phase-name">${phase.name}</h3>
-                    <span class="phase-duration">${phase.duration}</span>
+        <div class="mb-8">
+            <div class="rounded-lg border-l-4 border-slate-800 bg-slate-900/50 p-6 mb-6" style="border-left-color: ${phase.color}">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold" style="background: ${phase.color}">${pi + 1}</div>
+                    <div>
+                        <h3 class="text-slate-100 font-bold text-lg">${phase.name}</h3>
+                        <span class="text-slate-400 text-sm">${phase.duration}</span>
+                    </div>
                 </div>
             </div>
-            <div class="phase-deliverables">
+            <div class="space-y-3">
                 ${phase.deliverables.map(d => `
-                    <div class="deliverable-card">
-                        <div class="del-header">
-                            <span class="del-name">${d.name}</span>
-                            <span class="del-weeks">${d.weeks} weeks</span>
+                    <div class="rounded-lg border border-slate-800 p-4 bg-slate-900/50 hover:bg-slate-800/50 transition-colors">
+                        <div class="flex justify-between items-start gap-4 mb-2">
+                            <span class="text-slate-100 font-semibold">${d.name}</span>
+                            <span class="text-slate-400 text-sm">${d.weeks} weeks</span>
                         </div>
-                        <p class="del-desc">${d.description}</p>
-                        <div class="del-bar">
-                            <div class="del-bar-fill" style="width: ${(d.weeks / 5) * 100}%; background: ${phase.color}"></div>
+                        <p class="text-slate-400 text-sm mb-3">${d.description}</p>
+                        <div class="h-2 bg-slate-800 rounded-full overflow-hidden">
+                            <div class="h-full transition-all" style="width: ${(d.weeks / 5) * 100}%; background: ${phase.color}"></div>
                         </div>
                     </div>
                 `).join('')}
@@ -711,21 +852,22 @@ function renderTimeline() {
 function renderDeliverables() {
     const phases = DATA.phases[state.industry];
     const table = document.getElementById('deliverablesTable');
+    if (!table) return;
 
-    let html = `<div class="del-table-header">
-        <span class="del-th">Deliverable</span>
-        <span class="del-th">Duration</span>
-        <span class="del-th">Phase</span>
-        <span class="del-th del-th-wide">How to Complete</span>
+    let html = `<div class="grid grid-cols-4 gap-4 mb-4 pb-4 border-b border-slate-700">
+        <span class="text-slate-300 font-semibold">Deliverable</span>
+        <span class="text-slate-300 font-semibold">Duration</span>
+        <span class="text-slate-300 font-semibold">Phase</span>
+        <span class="text-slate-300 font-semibold">How to Complete</span>
     </div>`;
 
     phases.forEach((phase, pi) => {
         phase.deliverables.forEach(d => {
-            html += `<div class="del-table-row">
-                <span class="del-td del-td-name">${d.name}</span>
-                <span class="del-td">${d.weeks} weeks</span>
-                <span class="del-td"><span class="phase-badge" style="background: ${phase.color}">${pi + 1}</span></span>
-                <span class="del-td del-td-wide del-td-howto">${d.howTo}</span>
+            html += `<div class="grid grid-cols-4 gap-4 py-3 border-b border-slate-800 hover:bg-slate-900/50 transition-colors">
+                <span class="text-slate-100">${d.name}</span>
+                <span class="text-slate-400">${d.weeks} weeks</span>
+                <span><span class="inline-block px-2 py-1 rounded text-xs font-medium text-white" style="background: ${phase.color}">${pi + 1}</span></span>
+                <span class="text-slate-400 text-sm">${d.howTo}</span>
             </div>`;
         });
     });
@@ -797,75 +939,109 @@ function generateProposal() {
     let html = '';
 
     // Executive Summary
-    html += `<div class="proposal-section">
-        <h3>Executive Summary</h3>
-        <div class="proposal-exec-summary">${templates.executiveSummary(c)}</div>
+    html += `<div class="mb-8">
+        <h3 class="text-slate-100 font-bold text-xl mb-4">Executive Summary</h3>
+        <div class="text-slate-400 leading-relaxed">${templates.executiveSummary(c)}</div>
     </div>`;
 
     // Scope of Work
-    html += `<div class="proposal-section">
-        <h3>Scope of Work</h3>
-        <div class="proposal-text">${templates.scopeNarrative(c)}</div>
-        <div class="proposal-module-grid">
-            ${c.moduleNames.map(n => `<div class="proposal-module-item">${n}</div>`).join('')}
+    html += `<div class="mb-8">
+        <h3 class="text-slate-100 font-bold text-xl mb-4">Scope of Work</h3>
+        <div class="text-slate-400 leading-relaxed mb-4">${templates.scopeNarrative(c)}</div>
+        <div class="grid grid-cols-2 gap-3">
+            ${c.moduleNames.map(n => `<div class="rounded-lg border border-slate-800 bg-slate-900/50 p-3 text-slate-100">${n}</div>`).join('')}
         </div>
     </div>`;
 
     // Implementation Approach
-    html += `<div class="proposal-section">
-        <h3>Implementation Approach</h3>
-        <div class="proposal-text">${templates.approachNarrative(c)}</div>
+    html += `<div class="mb-8">
+        <h3 class="text-slate-100 font-bold text-xl mb-4">Implementation Approach</h3>
+        <div class="text-slate-400 leading-relaxed">${templates.approachNarrative(c)}</div>
     </div>`;
 
     // Team Composition
-    html += `<div class="proposal-section">
-        <h3>Team Composition</h3>
-        <div class="proposal-text"><strong>${c.teamSizeLabel} team</strong> of <strong>${c.headcount} FTEs</strong> over <strong>${c.duration} months</strong>.</div>
-        <table class="proposal-team-table">
-            <thead><tr><th>Role</th><th>Count</th><th>Focus</th></tr></thead>
-            <tbody>${c.roles.map(r => `<tr><td>${r.role}</td><td>${r.count}</td><td>${r.responsibilities}</td></tr>`).join('')}</tbody>
+    html += `<div class="mb-8">
+        <h3 class="text-slate-100 font-bold text-xl mb-4">Team Composition</h3>
+        <div class="text-slate-400 leading-relaxed mb-4"><strong>${c.teamSizeLabel} team</strong> of <strong>${c.headcount} FTEs</strong> over <strong>${c.duration} months</strong>.</div>
+        <table class="w-full border-collapse">
+            <thead>
+                <tr class="border-b border-slate-700">
+                    <th class="text-left text-slate-300 font-semibold py-2">Role</th>
+                    <th class="text-left text-slate-300 font-semibold py-2">Count</th>
+                    <th class="text-left text-slate-300 font-semibold py-2">Focus</th>
+                </tr>
+            </thead>
+            <tbody>${c.roles.map(r => `<tr class="border-b border-slate-800"><td class="py-2 text-slate-100">${r.role}</td><td class="py-2 text-slate-100">${r.count}</td><td class="py-2 text-slate-400">${r.responsibilities}</td></tr>`).join('')}</tbody>
         </table>
     </div>`;
 
     // Investment Summary
-    html += `<div class="proposal-section">
-        <h3>Investment Summary</h3>
-        <div class="proposal-text">${templates.investmentNarrative(c)}</div>
-        <div class="proposal-cost-grid">
-            <div class="proposal-cost-item"><div class="pcl">Implementation</div><div class="pcv">${c.implCost}</div></div>
-            <div class="proposal-cost-item"><div class="pcl">Technology</div><div class="pcv">${c.techCost}</div></div>
-            <div class="proposal-cost-item"><div class="pcl">Change Mgmt</div><div class="pcv">${c.changeCost}</div></div>
-            <div class="proposal-cost-item" style="border-color: var(--accent);">
-                <div class="pcl">Total Investment</div><div class="pcv" style="color: var(--accent-light);">${c.totalCost}</div>
+    html += `<div class="mb-8">
+        <h3 class="text-slate-100 font-bold text-xl mb-4">Investment Summary</h3>
+        <div class="text-slate-400 leading-relaxed mb-4">${templates.investmentNarrative(c)}</div>
+        <div class="grid grid-cols-2 gap-4">
+            <div class="rounded-lg border border-slate-800 p-4 bg-slate-900/50">
+                <div class="text-slate-400 text-sm">Implementation</div>
+                <div class="text-slate-100 font-bold text-lg">${c.implCost}</div>
+            </div>
+            <div class="rounded-lg border border-slate-800 p-4 bg-slate-900/50">
+                <div class="text-slate-400 text-sm">Technology</div>
+                <div class="text-slate-100 font-bold text-lg">${c.techCost}</div>
+            </div>
+            <div class="rounded-lg border border-slate-800 p-4 bg-slate-900/50">
+                <div class="text-slate-400 text-sm">Change Mgmt</div>
+                <div class="text-slate-100 font-bold text-lg">${c.changeCost}</div>
+            </div>
+            <div class="rounded-lg border border-indigo-600 p-4 bg-indigo-500/10">
+                <div class="text-slate-400 text-sm">Total Investment</div>
+                <div class="text-indigo-300 font-bold text-lg">${c.totalCost}</div>
             </div>
         </div>
     </div>`;
 
     // ROI Projection
-    html += `<div class="proposal-section">
-        <h3>ROI Projection</h3>
-        <div class="proposal-text">${templates.roiNarrative(c)}</div>
-        <div class="proposal-cost-grid">
-            <div class="proposal-cost-item"><div class="pcl">3-Year ROI</div><div class="pcv" style="color:var(--green);">${c.roiPercent}</div></div>
-            <div class="proposal-cost-item"><div class="pcl">Payback</div><div class="pcv">${c.paybackMonths} mo</div></div>
-            <div class="proposal-cost-item"><div class="pcl">Annual Savings</div><div class="pcv" style="color:var(--green);">${c.annualSavings}</div></div>
-            <div class="proposal-cost-item"><div class="pcl">FTE Hours Saved</div><div class="pcv">${c.fteHoursSaved}/yr</div></div>
+    html += `<div class="mb-8">
+        <h3 class="text-slate-100 font-bold text-xl mb-4">ROI Projection</h3>
+        <div class="text-slate-400 leading-relaxed mb-4">${templates.roiNarrative(c)}</div>
+        <div class="grid grid-cols-2 gap-4">
+            <div class="rounded-lg border border-slate-800 p-4 bg-slate-900/50">
+                <div class="text-slate-400 text-sm">3-Year ROI</div>
+                <div class="text-green-400 font-bold text-lg">${c.roiPercent}</div>
+            </div>
+            <div class="rounded-lg border border-slate-800 p-4 bg-slate-900/50">
+                <div class="text-slate-400 text-sm">Payback</div>
+                <div class="text-slate-100 font-bold text-lg">${c.paybackMonths} mo</div>
+            </div>
+            <div class="rounded-lg border border-slate-800 p-4 bg-slate-900/50">
+                <div class="text-slate-400 text-sm">Annual Savings</div>
+                <div class="text-green-400 font-bold text-lg">${c.annualSavings}</div>
+            </div>
+            <div class="rounded-lg border border-slate-800 p-4 bg-slate-900/50">
+                <div class="text-slate-400 text-sm">FTE Hours Saved</div>
+                <div class="text-slate-100 font-bold text-lg">${c.fteHoursSaved}/yr</div>
+            </div>
         </div>
     </div>`;
 
     content.innerHTML = html;
-    document.getElementById('proposalModal').classList.add('active');
+    const modal = document.getElementById('proposalModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+    }
 }
 
 function closeProposal() {
-    document.getElementById('proposalModal').classList.remove('active');
+    const modal = document.getElementById('proposalModal');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
 }
 
 function copyProposal() {
     const content = document.getElementById('proposalContent');
     const text = content.innerText;
     navigator.clipboard.writeText(text).then(() => {
-        const btn = document.querySelector('.proposal-actions .btn-primary');
+        const btn = document.querySelector('.proposal-actions button');
         const orig = btn.textContent;
         btn.textContent = 'Copied!';
         setTimeout(() => btn.textContent = orig, 2000);
@@ -913,18 +1089,28 @@ function prepareGammaExport() {
     // Store for external access
     window.__gammaExportPayload = payload;
 
-    document.getElementById('gammaExportText').value = payload;
-    document.getElementById('gammaExportModal').classList.add('active');
+    const textEl = document.getElementById('gammaExportText');
+    if (textEl) {
+        textEl.value = payload;
+    }
+
+    const modal = document.getElementById('gammaExportModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+    }
 }
 
 function closeGammaExport() {
-    document.getElementById('gammaExportModal').classList.remove('active');
+    const modal = document.getElementById('gammaExportModal');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
 }
 
 function copyGammaExport() {
     const textarea = document.getElementById('gammaExportText');
     navigator.clipboard.writeText(textarea.value).then(() => {
-        const btn = document.querySelector('.gamma-actions .btn-primary');
+        const btn = document.querySelector('.gamma-actions button');
         const orig = btn.textContent;
         btn.textContent = 'Copied!';
         setTimeout(() => btn.textContent = orig, 2000);
@@ -945,23 +1131,25 @@ function renderExportSummary() {
     const totalHeadcount = roles.reduce((sum, r) => sum + r.count, 0);
 
     const el = document.getElementById('exportSummary');
+    if (!el) return;
+
     el.innerHTML = `
-        <div class="export-section">
-            <h4>Industry</h4>
-            <p>${state.industry === 'agency' ? 'Agency' : 'Publisher'}</p>
+        <div class="mb-4">
+            <h4 class="text-slate-300 text-sm font-semibold mb-2">Industry</h4>
+            <p class="text-slate-100">${state.industry === 'agency' ? 'Agency' : 'Publisher'}</p>
         </div>
-        ${state.generatedFrom ? `<div class="export-section"><h4>Generated From</h4><p>${state.generatedFrom}</p></div>` : ''}
-        <div class="export-section">
-            <h4>Selected Modules (${state.selectedModules.size})</h4>
-            <div class="export-tags">${selectedNames.map(n => `<span class="export-tag">${n}</span>`).join('')}</div>
+        ${state.generatedFrom ? `<div class="mb-4"><h4 class="text-slate-300 text-sm font-semibold mb-2">Generated From</h4><p class="text-slate-100">${state.generatedFrom}</p></div>` : ''}
+        <div class="mb-4">
+            <h4 class="text-slate-300 text-sm font-semibold mb-2">Selected Modules (${state.selectedModules.size})</h4>
+            <div class="flex flex-wrap gap-2">${selectedNames.map(n => `<span class="inline-block px-3 py-1 rounded-full text-xs font-medium bg-indigo-500/20 text-indigo-300">${n}</span>`).join('')}</div>
         </div>
-        <div class="export-section">
-            <h4>Team</h4>
-            <p>${state.teamSize.charAt(0).toUpperCase() + state.teamSize.slice(1)} (${totalHeadcount} FTEs)</p>
+        <div class="mb-4">
+            <h4 class="text-slate-300 text-sm font-semibold mb-2">Team</h4>
+            <p class="text-slate-100">${state.teamSize.charAt(0).toUpperCase() + state.teamSize.slice(1)} (${totalHeadcount} FTEs)</p>
         </div>
-        <div class="export-section">
-            <h4>Duration</h4>
-            <p>${state.duration} months</p>
+        <div class="mb-4">
+            <h4 class="text-slate-300 text-sm font-semibold mb-2">Duration</h4>
+            <p class="text-slate-100">${state.duration} months</p>
         </div>
     `;
 }
@@ -977,10 +1165,10 @@ function exportPlan() {
         industry: state.industry,
         generatedAt: new Date().toISOString(),
         generatedFrom: state.generatedFrom,
-        scope: { modules: selectedModulesArr, totalModules: state.selectedModules.size, complexity: document.getElementById('complexityLevel').textContent },
+        scope: { modules: selectedModulesArr, totalModules: state.selectedModules.size, complexity: document.getElementById('complexityLevel')?.textContent || '—' },
         team: { size: state.teamSize, roles: DATA.teamRoles[state.teamSize], totalHeadcount: DATA.teamRoles[state.teamSize].reduce((s, r) => s + r.count, 0) },
-        financials: { duration: state.duration + ' months', totalInvestment: document.getElementById('totalCost').textContent, implementation: document.getElementById('implCost').textContent, technology: document.getElementById('techCost').textContent, changeManagement: document.getElementById('changeCost').textContent, support: document.getElementById('supportCost').textContent },
-        roi: { threeYearROI: document.getElementById('roiPercent').textContent, paybackMonths: document.getElementById('paybackMonths').textContent, annualSavings: document.getElementById('annualSavings').textContent, fteHoursSaved: document.getElementById('fteReduction').textContent },
+        financials: { duration: state.duration + ' months', totalInvestment: document.getElementById('totalCost')?.textContent || '$0', implementation: document.getElementById('implCost')?.textContent || '$0', technology: document.getElementById('techCost')?.textContent || '$0', changeManagement: document.getElementById('changeCost')?.textContent || '$0', support: document.getElementById('supportCost')?.textContent || '$0' },
+        roi: { threeYearROI: document.getElementById('roiPercent')?.textContent || '0%', paybackMonths: document.getElementById('paybackMonths')?.textContent || '0', annualSavings: document.getElementById('annualSavings')?.textContent || '$0', fteHoursSaved: document.getElementById('fteReduction')?.textContent || '0' },
         timeline: DATA.phases[state.industry]
     };
 
@@ -991,6 +1179,11 @@ function exportPlan() {
     a.download = `fpa-automation-plan-${state.industry}-${Date.now()}.json`;
     a.click();
     URL.revokeObjectURL(url);
+}
+
+// Alias for HTML onclick
+function exportJSON() {
+    exportPlan();
 }
 
 // ----------------------------------------------------------
@@ -1015,6 +1208,7 @@ function initKeyboardShortcuts() {
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             closeArchDetail();
+            closeTechDetail();
             closeProposal();
             closeGammaExport();
         }
