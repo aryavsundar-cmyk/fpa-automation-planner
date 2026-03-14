@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FP&A Automation — Agencies & Publishers</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <span class="brand-icon">◈</span>
+                <span class="brand-text">FP&A Automation</span>
+            </div>
+            <div class="nav-links">
+                <a href="#use-cases">Use Cases</a>
+                <a href="#architecture">Architecture</a>
+                <a href="#scope">Scope</a>
+                <a href="#team">Team</a>
+                <a href="#cost">Cost</a>
+                <a href="#timeline">Timeline</a>
+                <a href="#summary" class="nav-proposal-link">Proposal</a>
+            </div>
+            <div class="industry-toggle" id="industryToggle">
+                <button class="toggle-btn active" data-industry="agency" onclick="setIndustry('agency')">Agencies</button>
+                <button class="toggle-btn" data-industry="publisher" onclick="setIndustry('publisher')">Publishers</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+        <div class="hero-bg-grid"></div>
+        <div class="hero-content">
+            <div class="hero-badge">Financial Planning & Analysis</div>
+            <h1 class="hero-title">
+                <span class="hero-line">Automate Your</span>
+                <span class="hero-line gradient-text" id="heroIndustryText">Agency FP&A</span>
+                <span class="hero-line">Operations</span>
+            </h1>
+            <p class="hero-subtitle" id="heroSubtitle">
+                End-to-end automation for financial planning, forecasting, and analysis —
+                purpose-built for agencies managing complex client portfolios and multi-entity operations.
+            </p>
+            <div class="hero-stats">
+                <div class="stat-card">
+                    <span class="stat-value">60-80%</span>
+                    <span class="stat-label">Reduction in Manual Reporting</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value">3-5x</span>
+                    <span class="stat-label">Faster Close Cycles</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value">95%+</span>
+                    <span class="stat-label">Forecast Accuracy</span>
+                </div>
+            </div>
+            <div class="hero-cta">
+                <a href="#scope" class="btn-primary">Configure Your Project →</a>
+                <a href="#use-cases" class="btn-secondary">Explore Use Cases</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Industry Context Banner -->
+    <section class="context-banner" id="contextBanner">
+        <div class="container">
+            <div class="context-grid" id="contextGrid">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Business Use Cases Section -->
+    <section class="section" id="use-cases">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">Business Value</span>
+                <h2 class="section-title">FP&A Use Cases for <span class="gradient-text" id="useCaseIndustryLabel">Agencies</span></h2>
+                <p class="section-desc" id="useCaseDesc">Core automation opportunities mapped to measurable business outcomes.</p>
+            </div>
+            <div class="use-case-grid" id="useCaseGrid">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Technical Architecture Section -->
+    <section class="section section-dark" id="architecture">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">Technical Design</span>
+                <h2 class="section-title">Solution Architecture</h2>
+                <p class="section-desc">Modular, cloud-native architecture designed for scalability and integration flexibility.</p>
+            </div>
+            <div class="arch-diagram" id="archDiagram">
+                <!-- Architecture layers -->
+                <div class="arch-layer" data-layer="sources">
+                    <div class="layer-label">Data Sources</div>
+                    <div class="layer-items" id="archSources"></div>
+                </div>
+                <div class="arch-connector">
+                    <div class="connector-line"></div>
+                    <span class="connector-label">ETL / ELT Pipelines</span>
+                    <div class="connector-line"></div>
+                </div>
+                <div class="arch-layer" data-layer="platform">
+                    <div class="layer-label">Data Platform</div>
+                    <div class="layer-items" id="archPlatform"></div>
+                </div>
+                <div class="arch-connector">
+                    <div class="connector-line"></div>
+                    <span class="connector-label">Analytics & ML Engine</span>
+                    <div class="connector-line"></div>
+                </div>
+                <div class="arch-layer" data-layer="apps">
+                    <div class="layer-label">Application Layer</div>
+                    <div class="layer-items" id="archApps"></div>
+                </div>
+                <div class="arch-connector">
+                    <div class="connector-line"></div>
+                    <span class="connector-label">Presentation</span>
+                    <div class="connector-line"></div>
+                </div>
+                <div class="arch-layer" data-layer="output">
+                    <div class="layer-label">Outputs</div>
+                    <div class="layer-items" id="archOutputs"></div>
+                </div>
+            </div>
+            <!-- Tech Stack -->
+            <div class="tech-stack">
+                <h3 class="tech-stack-title">Recommended Technology Stack</h3>
+                <div class="tech-grid" id="techGrid">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Scope Configurator Section -->
+    <section class="section" id="scope">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">Project Configurator</span>
+                <h2 class="section-title">Define Your Project Scope</h2>
+                <p class="section-desc">Select the modules and capabilities that match your transformation goals.</p>
+            </div>
+            <!-- Generated From Banner -->
+            <div id="generatedFromBanner" class="generated-from-banner" style="display: none;">
+                <div class="gfb-content">
+                    <span class="gfb-icon">⚡</span>
+                    <span>Auto-configured from: <strong id="generatedFromName"></strong></span>
+                </div>
+                <button class="gfb-clear" onclick="clearGeneratedFrom()">✕ Clear</button>
+            </div>
+            <div class="scope-layout">
+                <div class="scope-modules" id="scopeModules">
+                    <!-- Populated by JS -->
+                </div>
+                <div class="scope-summary">
+                    <div class="summary-card">
+                        <h3 class="summary-title">Scope Summary</h3>
+                        <div class="summary-stats">
+                            <div class="summary-stat">
+                                <span class="summary-stat-label">Modules Selected</span>
+                                <span class="summary-stat-value" id="moduleCount">0</span>
+                            </div>
+                            <div class="summary-stat">
+                                <span class="summary-stat-label">Estimated Complexity</span>
+                                <span class="summary-stat-value" id="complexityLevel">—</span>
+                            </div>
+                            <div class="summary-stat">
+                                <span class="summary-stat-label">Integration Points</span>
+                                <span class="summary-stat-value" id="integrationCount">0</span>
+                            </div>
+                        </div>
+                        <div class="scope-presets">
+                            <h4>Quick Presets</h4>
+                            <button class="preset-btn" onclick="applyPreset('mvp')">MVP — Core FP&A</button>
+                            <button class="preset-btn" onclick="applyPreset('standard')">Standard — Full Suite</button>
+                            <button class="preset-btn" onclick="applyPreset('enterprise')">Enterprise — All Modules</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Builder Section -->
+    <section class="section section-dark" id="team">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">Team Planning</span>
+                <h2 class="section-title">Team Composition & Roles</h2>
+                <p class="section-desc">Configure your implementation team based on project scope and timeline.</p>
+            </div>
+            <div class="team-layout">
+                <div class="team-size-selector">
+                    <h3>Team Size</h3>
+                    <div class="size-options">
+                        <button class="size-btn active" data-size="small" onclick="setTeamSize('small')">
+                            <span class="size-icon">◆</span>
+                            <span class="size-label">Small</span>
+                            <span class="size-count">4-6 people</span>
+                        </button>
+                        <button class="size-btn" data-size="medium" onclick="setTeamSize('medium')">
+                            <span class="size-icon">◆◆</span>
+                            <span class="size-label">Medium</span>
+                            <span class="size-count">7-12 people</span>
+                        </button>
+                        <button class="size-btn" data-size="large" onclick="setTeamSize('large')">
+                            <span class="size-icon">◆◆◆</span>
+                            <span class="size-label">Large</span>
+                            <span class="size-count">13-20 people</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="team-roster" id="teamRoster">
+                    <!-- Populated by JS -->
+                </div>
+                <div class="team-chart">
+                    <h3>Team Allocation</h3>
+                    <div class="allocation-bars" id="allocationBars">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Cost Calculator Section -->
+    <section class="section" id="cost">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">Investment Analysis</span>
+                <h2 class="section-title">Cost Calculator & ROI</h2>
+                <p class="section-desc">Estimate project investment based on your configured scope, team, and timeline.</p>
+            </div>
+            <!-- Pricing Mode Toggle -->
+            <div class="pricing-mode-toggle">
+                <button class="pricing-mode-btn active" id="packagePricingBtn" onclick="setPricingMode('package')">
+                    📦 Package Pricing
+                </button>
+                <button class="pricing-mode-btn" id="calculatorPricingBtn" onclick="setPricingMode('calculator')">
+                    🧮 Pricing Calculator
+                </button>
+            </div>
+
+            <div class="cost-layout">
+                <!-- Package Pricing Controls -->
+                <div class="cost-controls" id="packagePricingControls">
+                    <div class="cost-control-group">
+                        <label>Project Duration</label>
+                        <div class="duration-slider">
+                            <input type="range" min="2" max="24" value="9" id="durationSlider" oninput="updateCosts()">
+                            <span class="duration-display" id="durationDisplay">9 months</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calculator Pricing Controls -->
+                <div class="cost-controls pricing-calculator-hidden" id="calculatorPricingControls">
+                    <div class="calculator-header">
+                        <div class="calculator-input-group">
+                            <label>Duration (weeks)</label>
+                            <input type="number" id="calcDurationWeeks" min="4" max="104" value="36" oninput="updateCalculatorCosts()" style="width: 80px; padding: 6px; border: 1px solid #2e2e4e; background: var(--bg-card); color: var(--text); border-radius: 6px;">
+                        </div>
+                    </div>
+                    <div class="calculator-roles-list" id="calculatorRolesList"></div>
+                </div>
+                <div class="cost-breakdown">
+                    <div class="cost-card cost-total">
+                        <span class="cost-card-label">Total Project Investment</span>
+                        <span class="cost-card-value" id="totalCost">$0</span>
+                        <span class="cost-card-sub" id="totalCostRange">Estimated range</span>
+                    </div>
+                    <div class="cost-details-grid">
+                        <div class="cost-card">
+                            <span class="cost-card-label">Implementation</span>
+                            <span class="cost-card-value" id="implCost">$0</span>
+                            <span class="cost-card-sub">Professional Services</span>
+                        </div>
+                        <div class="cost-card">
+                            <span class="cost-card-label">Technology & Licensing</span>
+                            <span class="cost-card-value" id="techCost">$0</span>
+                            <span class="cost-card-sub">Annual Platform Costs</span>
+                        </div>
+                        <div class="cost-card">
+                            <span class="cost-card-label">Change Management</span>
+                            <span class="cost-card-value" id="changeCost">$0</span>
+                            <span class="cost-card-sub">Training & Adoption</span>
+                        </div>
+                        <div class="cost-card">
+                            <span class="cost-card-label">Ongoing Support</span>
+                            <span class="cost-card-value" id="supportCost">$0</span>
+                            <span class="cost-card-sub">Annual Run Rate</span>
+                        </div>
+                    </div>
+                    <!-- ROI Section -->
+                    <div class="roi-section">
+                        <h3>Projected ROI</h3>
+                        <div class="roi-grid">
+                            <div class="roi-card">
+                                <span class="roi-value" id="roiPercent">0%</span>
+                                <span class="roi-label">3-Year ROI</span>
+                            </div>
+                            <div class="roi-card">
+                                <span class="roi-value" id="paybackMonths">0</span>
+                                <span class="roi-label">Payback Period (months)</span>
+                            </div>
+                            <div class="roi-card">
+                                <span class="roi-value" id="annualSavings">$0</span>
+                                <span class="roi-label">Annual Savings</span>
+                            </div>
+                            <div class="roi-card">
+                                <span class="roi-value" id="fteReduction">0</span>
+                                <span class="roi-label">FTE Hours Saved / Year</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Timeline Section -->
+    <section class="section section-dark" id="timeline">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">Implementation Roadmap</span>
+                <h2 class="section-title">Timeline & Deliverables</h2>
+                <p class="section-desc">Phased delivery plan with milestones, deliverables, and completion criteria.</p>
+            </div>
+            <div class="timeline-container" id="timelineContainer">
+                <!-- Populated by JS -->
+            </div>
+            <!-- Deliverables Table -->
+            <div class="deliverables-section">
+                <h3 class="deliverables-title">How to Complete Each Deliverable</h3>
+                <div class="deliverables-table" id="deliverablesTable">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Summary / Export Section -->
+    <section class="section" id="summary">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">Project Summary</span>
+                <h2 class="section-title">Your Configuration</h2>
+                <p class="section-desc">Review your complete project configuration and export the plan.</p>
+            </div>
+            <div class="summary-export">
+                <div class="export-card" id="exportSummary">
+                    <!-- Populated by JS -->
+                </div>
+                <div class="export-actions">
+                    <button class="btn-primary" onclick="generateProposal()">Generate Proposal</button>
+                    <button class="btn-secondary" onclick="prepareGammaExport()">Prepare Gamma Presentation</button>
+                    <button class="btn-tertiary" onclick="exportPlan()">Export JSON</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <span class="brand-icon">◈</span>
+                    <span>FP&A Automation</span>
+                </div>
+                <div class="footer-note">
+                    Project planning tool for FP&A transformation initiatives.<br>
+                    Estimates are indicative and subject to detailed scoping.
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Architecture Detail Modal -->
+    <div id="archDetailModal" class="modal-overlay" onclick="if(event.target===this)closeArchDetail()">
+        <div class="modal-content modal-arch">
+            <button class="modal-close" onclick="closeArchDetail()">✕</button>
+            <div class="modal-arch-header">
+                <span class="modal-arch-layer" id="archModalLayer"></span>
+                <h2 class="modal-arch-title" id="archModalTitle"></h2>
+                <span class="modal-arch-sub" id="archModalSub"></span>
+            </div>
+            <div class="modal-arch-body">
+                <div class="modal-arch-col">
+                    <h3><span class="col-icon">⚙</span> Technical Perspective</h3>
+                    <p id="archModalTech"></p>
+                </div>
+                <div class="modal-arch-col">
+                    <h3><span class="col-icon">📊</span> Business Perspective</h3>
+                    <p id="archModalBusiness"></p>
+                </div>
+            </div>
+            <div class="modal-arch-connections">
+                <h3>Data Flow Connections</h3>
+                <div class="connections-layout">
+                    <div class="conn-group">
+                        <span class="conn-label">Upstream (data from)</span>
+                        <div class="conn-tags" id="archModalUpstream"></div>
+                    </div>
+                    <div class="conn-arrow">→</div>
+                    <div class="conn-current" id="archModalCurrentName"></div>
+                    <div class="conn-arrow">→</div>
+                    <div class="conn-group">
+                        <span class="conn-label">Downstream (feeds into)</span>
+                        <div class="conn-tags" id="archModalDownstream"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Proposal Modal -->
+    <div id="proposalModal" class="modal-overlay" onclick="if(event.target===this)closeProposal()">
+        <div class="modal-content modal-proposal">
+            <button class="modal-close" onclick="closeProposal()">✕</button>
+            <div class="proposal-header">
+                <h2>FP&A Automation Proposal</h2>
+                <span class="proposal-date" id="proposalDate"></span>
+            </div>
+            <div id="proposalContent">
+                <!-- Populated by JS -->
+            </div>
+            <div class="proposal-actions">
+                <button class="btn-primary" onclick="copyProposal()">Copy to Clipboard</button>
+                <button class="btn-secondary" onclick="printProposal()">Print / PDF</button>
+                <button class="btn-secondary" onclick="closeProposal();prepareGammaExport()">Export to Gamma</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gamma Export Modal -->
+    <div id="gammaExportModal" class="modal-overlay" onclick="if(event.target===this)closeGammaExport()">
+        <div class="modal-content modal-gamma">
+            <button class="modal-close" onclick="closeGammaExport()">✕</button>
+            <h2>Gamma Presentation Export</h2>
+            <p class="gamma-desc">The content below is formatted for Gamma presentation generation. Copy it or click "Generate" to create a slide deck.</p>
+            <textarea id="gammaExportText" class="gamma-export-textarea" readonly></textarea>
+            <div class="gamma-actions">
+                <button class="btn-primary" onclick="copyGammaExport()">Copy to Clipboard</button>
+                <button class="btn-secondary" onclick="closeGammaExport()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tech Detail Modal -->
+    <div id="techDetailModal" class="modal-overlay" onclick="if(event.target===this)closeTechDetail()">
+        <div class="modal-content modal-tech">
+            <button class="modal-close" onclick="closeTechDetail()">✕</button>
+            <div class="tech-detail-header">
+                <h2 id="techDetailCategory"></h2>
+                <div class="tech-detail-badges">
+                    <span class="tech-criticality-badge" id="techDetailCriticality"></span>
+                </div>
+            </div>
+
+            <div class="tech-detail-section">
+                <h3>Recommended</h3>
+                <div id="techDetailRecommended" class="tech-detail-recommended"></div>
+            </div>
+
+            <div class="tech-detail-section">
+                <h3>Options</h3>
+                <div id="techDetailOptions" style="display: flex; gap: 0.5rem; flex-wrap: wrap;"></div>
+            </div>
+
+            <div class="tech-detail-section">
+                <h3>Relevance to Your Project</h3>
+                <div class="tech-relevance-indicator">
+                    <div class="tech-relevance-bar">
+                        <div id="techDetailRelevanceBar" class="tech-relevance-fill"></div>
+                    </div>
+                    <span id="techDetailRelevancePercent" class="tech-relevance-text"></span>
+                </div>
+            </div>
+
+            <div class="tech-detail-section">
+                <h3>Why This Technology</h3>
+                <div id="techDetailReason" style="font-size: 0.95rem; line-height: 1.6;"></div>
+            </div>
+
+            <div class="tech-detail-section">
+                <div id="techDetailArchitecture"></div>
+            </div>
+
+            <div class="tech-detail-actions">
+                <button class="btn-secondary" onclick="closeTechDetail()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
