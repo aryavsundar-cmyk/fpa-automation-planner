@@ -10,12 +10,57 @@
 // INITIALIZATION
 // ----------------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
+    initializeSubscriptions();
     setIndustry('agency');
     setTeamSize('medium');
     applyPreset('standard');
     initScrollEffects();
     initKeyboardShortcuts();
 });
+
+/**
+ * Register all render subscriptions with StateManager
+ * Enables reactive updates when state changes after page load
+ */
+function initializeSubscriptions() {
+    // Industry changes trigger these renders
+    appState.subscribe('industry', () => renderContextBanner());
+    appState.subscribe('industry', () => renderUseCases());
+    appState.subscribe('industry', () => renderArchitecture());
+    appState.subscribe('industry', () => renderTechStack());
+    appState.subscribe('industry', () => renderTimeline());
+    appState.subscribe('industry', () => renderDeliverables());
+    appState.subscribe('industry', () => renderExportSummary());
+
+    // Module selection changes trigger these renders
+    appState.subscribe('selectedModules', () => renderScopeModules());
+    appState.subscribe('selectedModules', () => renderTechStack());
+    appState.subscribe('selectedModules', () => updateCosts());
+    appState.subscribe('selectedModules', () => updateScopeSummary());
+    appState.subscribe('selectedModules', () => renderDeliverables());
+    appState.subscribe('selectedModules', () => renderExportSummary());
+
+    // Expanded modules affect scope display
+    appState.subscribe('expandedModules', () => renderScopeModules());
+
+    // Team size changes trigger roster and cost updates
+    appState.subscribe('teamSize', () => renderTeamRoster());
+    appState.subscribe('teamSize', () => updateCosts());
+    appState.subscribe('teamSize', () => renderDeliverables());
+
+    // Duration (set via updateCosts) affects timeline and costs
+    appState.subscribe('duration', () => updateCosts());
+    appState.subscribe('duration', () => renderTimeline());
+
+    // Pricing mode changes affect cost display
+    appState.subscribe('pricingMode', () => updateCosts());
+
+    // Calculator roles changes affect costs
+    appState.subscribe('calculatorRoles', () => updateCalculatorCosts());
+    appState.subscribe('calculatorRoles', () => updateCosts());
+
+    console.log('✓ State subscriptions initialized');
+}
 
 // ----------------------------------------------------------
 // INDUSTRY TOGGLE
