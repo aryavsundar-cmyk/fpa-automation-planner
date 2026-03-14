@@ -34,6 +34,10 @@
     </script>
     <style>
         body { font-family: 'Inter', -apple-system, sans-serif; }
+        /* Adjust body layout for fixed sidebar on large screens */
+        @media (min-width: 1024px) {
+            body { margin-left: 320px; }
+        }
         .glass { @apply backdrop-blur-md bg-white/10 border border-white/20; }
         .card-hover { @apply transition-all duration-300 hover:shadow-xl hover:-translate-y-1; }
         .gradient-text { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
