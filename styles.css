@@ -659,6 +659,100 @@ ul { list-style: none; }
     cursor: pointer;
 }
 .duration-display { font-size: 16px; font-weight: 700; color: var(--accent-light); min-width: 80px; }
+
+/* Pricing Mode Toggle */
+.pricing-mode-toggle {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 32px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 20px;
+}
+.pricing-mode-btn {
+    padding: 10px 20px;
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: var(--text-dim);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.pricing-mode-btn:hover {
+    color: var(--text-bright);
+}
+.pricing-mode-btn.active {
+    color: var(--accent-light);
+    border-bottom-color: var(--accent);
+}
+
+/* Pricing Calculator */
+.calculator-header {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+}
+.calculator-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.calculator-input-group label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.calculator-roles-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+.calculator-role-row {
+    display: grid;
+    grid-template-columns: 40px 1fr 80px 80px 100px;
+    gap: 12px;
+    align-items: center;
+    padding: 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 13px;
+}
+.calculator-role-row input[type="checkbox"] {
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+}
+.calculator-role-name {
+    font-weight: 500;
+    color: var(--text-bright);
+}
+.calculator-role-input {
+    padding: 6px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 4px;
+    font-size: 12px;
+    font-family: monospace;
+}
+.calculator-role-revenue {
+    text-align: right;
+    font-weight: 600;
+    color: var(--accent-light);
+}
+.pricing-calculator-hidden {
+    display: none;
+}
+
 .delivery-options { display: flex; gap: 8px; }
 .delivery-btn, .license-btn {
     padding: 8px 16px;

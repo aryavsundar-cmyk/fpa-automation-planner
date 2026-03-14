@@ -8,7 +8,9 @@ let state = {
     teamSize: 'medium',
     duration: 9,
     generatedFrom: null,
-    expandedModules: new Set()
+    expandedModules: new Set(),
+    pricingMode: 'package', // 'package' or 'calculator'
+    calculatorRoles: {} // Stores which roles are selected in calculator
 };
 
 // ----------------------------------------------------------
@@ -459,7 +461,14 @@ function setTeamSize(size) {
         btn.classList.toggle('active', btn.dataset.size === size);
     });
     renderTeamRoster();
-    updateCosts();
+
+    // Update costs based on pricing mode
+    if (state.pricingMode === 'calculator') {
+        state.calculatorRoles = {}; // Reset calculator roles
+        initializeCalculator();
+    } else {
+        updateCosts();
+    }
     renderExportSummary();
 }
 
@@ -557,6 +566,104 @@ function updateCosts() {
     document.getElementById('paybackMonths').textContent = paybackMonths;
     document.getElementById('annualSavings').textContent = formatCurrency(annualSavings);
     document.getElementById('fteReduction').textContent = fteHours.toLocaleString();
+}
+
+// ----------------------------------------------------------
+// PRICING MODE & CALCULATOR
+// ----------------------------------------------------------
+function setPricingMode(mode) {
+    state.pricingMode = mode;
+
+    // Update button states
+    document.getElementById('packagePricingBtn').classList.toggle('active', mode === 'package');
+    document.getElementById('calculatorPricingBtn').classList.toggle('active', mode === 'calculator');
+
+    // Toggle visibility
+    document.getElementById('packagePricingControls').classList.toggle('pricing-calculator-hidden', mode !== 'package');
+    document.getElementById('calculatorPricingControls').classList.toggle('pricing-calculator-hidden', mode !== 'calculator');
+
+    // Initialize calculator on first use
+    if (mode === 'calculator' && Object.keys(state.calculatorRoles).length === 0) {
+        initializeCalculator();
+    }
+
+    // Update costs based on mode
+    if (mode === 'package') {
+        updateCosts();
+    } else {
+        updateCalculatorCosts();
+    }
+}
+
+function initializeCalculator() {
+    const roles = DATA.teamRoles[state.teamSize];
+    const rolesList = document.getElementById('calculatorRolesList');
+
+    rolesList.innerHTML = roles.map((role, idx) => {
+        const key = `${state.teamSize}-${idx}`;
+        state.calculatorRoles[key] = { selected: false, hoursPerWeek: 40, rate: role.rate, role: role.role };
+
+        return `
+            <div class="calculator-role-row">
+                <input type="checkbox" id="calc-role-${key}" onchange="toggleCalculatorRole('${key}')" />
+                <label for="calc-role-${key}" class="calculator-role-name">${role.role}</label>
+                <input type="number" class="calculator-role-input" min="0" max="60" value="40"
+                       onchange="updateCalculatorRoleHours('${key}', this.value)"
+                       placeholder="hrs/wk" />
+                <span style="text-align: center; font-size: 12px; color: var(--text-dim);">$${role.rate}/hr</span>
+                <span class="calculator-role-revenue" id="revenue-${key}">$0</span>
+            </div>
+        `;
+    }).join('');
+}
+
+function toggleCalculatorRole(key) {
+    const checkbox = document.getElementById(`calc-role-${key}`);
+    state.calculatorRoles[key].selected = checkbox.checked;
+    updateCalculatorCosts();
+}
+
+function updateCalculatorRoleHours(key, hours) {
+    state.calculatorRoles[key].hoursPerWeek = parseInt(hours) || 0;
+    updateCalculatorCosts();
+}
+
+function updateCalculatorCosts() {
+    const durationWeeks = parseInt(document.getElementById('calcDurationWeeks').value) || 36;
+    let totalRevenue = 0;
+
+    Object.entries(state.calculatorRoles).forEach(([key, roleConfig]) => {
+        const hours = roleConfig.hoursPerWeek * durationWeeks;
+        const revenue = Math.round(hours * roleConfig.rate);
+
+        if (roleConfig.selected) {
+            totalRevenue += revenue;
+        }
+
+        // Update revenue display
+        const revenueEl = document.getElementById(`revenue-${key}`);
+        if (revenueEl) {
+            revenueEl.textContent = roleConfig.selected ? formatCurrency(revenue) : '—';
+        }
+    });
+
+    // Update cost display
+    document.getElementById('implCost').textContent = formatCurrency(totalRevenue);
+    document.getElementById('techCost').textContent = '$0';
+    document.getElementById('changeCost').textContent = '$0';
+    document.getElementById('supportCost').textContent = '$0';
+    document.getElementById('totalCost').textContent = formatCurrency(totalRevenue);
+    document.getElementById('totalCostRange').textContent = `Range: ${formatCurrency(Math.round(totalRevenue * 0.90))} — ${formatCurrency(Math.round(totalRevenue * 1.15))}`;
+
+    // ROI based on calculator
+    const roiSavings = Math.round(totalRevenue * 0.25); // Assume 25% annual savings
+    const threeYearROI = Math.round(((roiSavings * 3 - totalRevenue) / totalRevenue) * 100);
+    const paybackMonths = Math.round((totalRevenue / roiSavings) * 12);
+
+    document.getElementById('roiPercent').textContent = threeYearROI + '%';
+    document.getElementById('paybackMonths').textContent = paybackMonths;
+    document.getElementById('annualSavings').textContent = formatCurrency(roiSavings);
+    document.getElementById('fteReduction').textContent = '—';
 }
 
 function formatCurrency(num) {
