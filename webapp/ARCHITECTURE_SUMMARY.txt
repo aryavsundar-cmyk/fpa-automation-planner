@@ -1,0 +1,444 @@
+==============================================================================
+FP&A AUTOMATION — TECHNICAL ARCHITECTURE DESIGN REPORT
+Prepared for 1,570-Hour, 5-Phase UX/UI Enhancement Project
+March 14, 2026
+==============================================================================
+
+PROJECT ANALYSIS
+================
+Current Codebase:
+  - index.html: 481 lines
+  - app.js: 1,216 lines (monolithic state + rendering logic)
+  - data.js: 1,228 lines (configuration + use cases)
+  - server.js: 14 lines (basic Express server)
+  - tailwind.config.js: 71 lines (v4 configuration)
+  - TOTAL: 3,010 lines
+
+Current Tech Stack:
+  - Vanilla JavaScript (ES6 modules)
+  - Tailwind CSS v4 (config file + optional CDN)
+  - Express.js (static file server)
+  - Single-page application (no build step)
+
+---
+
+RECOMMENDATION SUMMARY
+======================
+
+1. FRAMEWORK STRATEGY: Hybrid Vanilla + Vue.js
+   ✓ Phases 1-3: Stay vanilla JS (590 hrs) — zero overhead, fast iteration
+   ✓ Phase 4+: Introduce Vue.js 3 (400 hrs) — form complexity, API integration
+   ✓ Phases 4-5: Migrate to Pinia state management
+   
+   IMPACT: +1,200 LOC (Vue), +400 LOC (refactoring), zero disruption to Phase 1-3
+
+2. STATE MANAGEMENT: Custom Manager → Pinia Migration
+   ✓ Phases 1-3: Lightweight StateManager class (300 LOC)
+     - Simple pub/sub pattern: subscribe(key, callback)
+     - Immutable updates: setState(key, value)
+     - Scenario management: createScenario(), switchScenario()
+   
+   ✓ Phase 4: Migrate to Pinia (standard Vue.js store)
+     - 80% functionality, 20% complexity vs. Redux
+     - Composition API: better code organization
+     - Devtools integration for debugging
+   
+   IMPACT: Manageable complexity for 5+ scenarios + multiple views
+
+3. STYLING: Continue Tailwind v4
+   ✓ Keep existing tailwind.config.js (already optimized)
+   ✓ No migration needed — v4 is latest, performant
+   ✓ Optional: Pre-compile CSS when Phase 4 Vite build is added
+   
+   IMPACT: Zero technical debt, leverages existing setup
+
+4. VISUALIZATION LIBRARIES: Chart.js + D3.js
+   ✓ Phase 2: Chart.js only (bar, line, pie — 60KB)
+   ✓ Phase 3: Add D3.js (custom viz, dependency maps — 200KB → 100KB tree-shaken)
+   ✓ Phase 4+: Optional Plotly.js for advanced dashboards (skip if time-limited)
+   
+   IMPACT: 260KB combined, covers 95% of visualization needs
+
+5. DATA PERSISTENCE: localStorage + Optional Backend Sync
+   ✓ Phases 1-3: localStorage only (5-10MB quota, offline-first)
+     - Max 5 scenarios × 500KB each = 2.5MB used
+   
+   ✓ Phase 4: Optional Express.js endpoints
+     - POST /api/scenarios/save (multi-device sync)
+     - GET /api/scenarios/:userId (backup/recovery)
+   
+   IMPACT: No database required Phases 1-3; scalable if needed Phase 4+
+
+6. EXPORT FUNCTIONALITY: PDF + Excel
+   ✓ Phase 3: jsPDF + html2canvas (PDF, 70KB)
+   ✓ Phase 3: SheetJS (Excel export, 150KB)
+   ✓ Phase 4+: Optional CSV + JSON (trivial)
+   
+   IMPACT: Covers all proposal/scenario export requirements
+
+7. CLAUDE API INTEGRATION: Server-Side Wrapper
+   ✓ Phase 4: Backend Express.js endpoint
+   ✓ POST /api/generate-proposal (scenario config → AI narrative)
+   ✓ Protects API key, enables caching, rate limiting
+   
+   IMPACT: Secure, scalable, 200 LOC in server.js
+
+8. BUILD STRATEGY: No Build Phases 1-3, Vite Phase 4+
+   ✓ Phases 1-3: Vanilla JS modules + ES6 imports (no build)
+   ✓ Phase 4: Introduce Vite (fastest build tool, Vue.js standard)
+   ✓ Code splitting: phase1, phase2, phase3, phase4, vendor, viz, export
+   
+   IMPACT: Fast iteration early, optimized bundling later
+
+---
+
+ARCHITECTURE STRUCTURE
+======================
+
+Recommended Directory Layout:
+
+webapp/
+├── public/
+│   ├── index.html (main SPA)
+│   └── styles.css (compiled Tailwind)
+│
+├── src/
+│   ├── core/
+│   │   ├── state.js (StateManager class, 300 LOC)
+│   │   ├── events.js (Event emitter, 150 LOC)
+│   │   ├── storage.js (localStorage manager, 200 LOC)
+│   │   └── api.js (HTTP abstraction, 100 LOC)
+│   │
+│   ├── modules/
+│   │   ├── phase1/
+│   │   │   ├── sidebar.js (persistent sidebar, 150 LOC)
+│   │   │   ├── stakeholder-views.js (dashboard views, 180 LOC)
+│   │   │   ├── cost-transparency.js (cost calculator, 220 LOC)
+│   │   │   └── mobile.js (responsive design, 100 LOC)
+│   │   │
+│   │   ├── phase2/
+│   │   │   ├── comparison-matrix.js (scenario comparison, 200 LOC)
+│   │   │   ├── scenario-mgmt.js (CRUD operations, 150 LOC)
+│   │   │   └── educational-content.js (tooltips/help, 100 LOC)
+│   │   │
+│   │   ├── phase3/
+│   │   │   ├── risk-framework.js (risk matrix, 180 LOC)
+│   │   │   ├── visualization.js (Chart.js + D3, 200 LOC)
+│   │   │   └── timeline.js (Gantt chart, 180 LOC)
+│   │   │
+│   │   ├── phase4-vue/
+│   │   │   ├── AIGenerator.vue (Claude API form, 120 LOC)
+│   │   │   ├── IntegrationsHub.vue (integration cards, 100 LOC)
+│   │   │   ├── CaseStudies.vue (case study gallery, 120 LOC)
+│   │   │   └── ExportTemplates.vue (PDF/Excel UI, 100 LOC)
+│   │   │
+│   │   └── phase5/
+│   │       ├── performance.js (lazy loading, code splitting)
+│   │       ├── accessibility.js (ARIA labels, keyboard nav)
+│   │       └── mobile-polish.js (touch interactions)
+│   │
+│   ├── services/
+│   │   ├── visualization.js (Chart.js + D3 manager, 200 LOC)
+│   │   ├── export.js (PDF/Excel generation, 180 LOC)
+│   │   ├── claudeAPI.js (Claude integration, 100 LOC)
+│   │   ├── dataTransform.js (scenario logic, 150 LOC)
+│   │   └── cache.js (client-side caching, 100 LOC)
+│   │
+│   ├── components/
+│   │   ├── common/
+│   │   │   ├── Button.js (vanilla reusable button, 50 LOC)
+│   │   │   ├── Modal.js (modal dialog, 80 LOC)
+│   │   │   ├── Tabs.js (tab navigation, 70 LOC)
+│   │   │   └── Dropdown.js (dropdown menu, 60 LOC)
+│   │   │
+│   │   └── vue-components/
+│   │       ├── FormFields.vue (reusable form inputs)
+│   │       ├── DataTable.vue (sortable table)
+│   │       └── Charts.vue (Chart.js wrapper)
+│   │
+│   ├── utils/
+│   │   ├── validation.js (form validation, 100 LOC)
+│   │   ├── formatters.js (number/date formatting, 100 LOC)
+│   │   ├── dom.js (DOM helper functions, 80 LOC)
+│   │   └── math.js (financial calculations, 120 LOC)
+│   │
+│   ├── styles/
+│   │   ├── index.css (global + custom styles)
+│   │   ├── tailwind.config.js (Tailwind configuration)
+│   │   └── animations.css (custom animations)
+│   │
+│   ├── app.js (refactored main entry, 500 LOC)
+│   ├── data.js (configuration + use cases, 1,228 LOC — unchanged)
+│   └── main.vue.js (Vue.js entry point, Phase 4+)
+│
+├── server.js (Express static server + API routes, 50 LOC Phase 4)
+├── vite.config.js (build config, Phase 4+)
+├── tailwind.config.js (Tailwind v4 configuration)
+├── package.json (dependencies)
+└── .env (API keys, environment variables)
+
+---
+
+CODE VOLUME PROJECTIONS
+=======================
+
+Phase-by-Phase LOC Budget:
+
+                      Vanilla   Vue    Services   Total New   Total Project
+Current              1,216      —      1,794      —           3,010
+Phase 1 (Week 3)     +600       —      +300       +900        3,910
+Phase 2 (Week 4-5)   +400       —      +400       +800        4,710
+Phase 3 (Week 6-7)   +500       —      +500       +1,000      5,710
+Phase 4 Setup (W8)   +0         +300   +200       +500        6,210
+Phase 4a (Week 9)    +0         +400   +300       +700        6,910
+Phase 4b (Week 10)   +0         +300   +200       +500        7,410
+Phase 5 (Week 11)    +200       +200   +100       +500        7,910
+QA (Week 12)         —          —      —          —           7,910
+
+TOTAL PROJECT        2,916      1,200  3,794      7,910       —
+
+Effort Estimate: ~670 hours of development + 50 hours QA = 720 hours
+Your available: 1,570 hours
+Buffer/Contingency: 850 hours (room for advanced features, integrations, training)
+
+---
+
+IMPLEMENTATION TIMELINE
+=======================
+
+Week 1-2: Refactor Architecture (80 hrs)
+  ├─ Extract state.js, events.js, storage.js from app.js
+  ├─ Create module directory structure
+  ├─ Migrate visualization logic to services/
+  └─ Test all existing functionality (no behavior changes)
+
+Week 3: Phase 1 (110 hrs)
+  ├─ Persistent sidebar (localStorage)
+  ├─ Stakeholder view filters
+  ├─ Cost transparency calculator
+  └─ Mobile responsive redesign (Tailwind v4)
+
+Week 4-5: Phase 2 (50 hrs)
+  ├─ Scenario comparison matrix
+  ├─ Scenario CRUD (create/load/save/delete)
+  └─ Educational content (tooltips)
+
+Week 6-7: Phase 3 (80 hrs)
+  ├─ Risk framework (risk matrix)
+  ├─ Chart.js visualizations (dashboard)
+  ├─ D3.js dependency map
+  └─ Interactive timeline (Gantt)
+
+Week 8: Phase 4 Setup (50 hrs)
+  ├─ Initialize Vite + Vue.js 3
+  ├─ Create Pinia stores
+  ├─ Set up Claude API backend wrapper
+  └─ Verify vanilla + Vue.js coexistence
+
+Week 9: Phase 4a (100 hrs)
+  ├─ AI Proposal Generator form (Vue)
+  ├─ Claude API integration
+  └─ Integrations Marketplace UI
+
+Week 10: Phase 4b (100 hrs)
+  ├─ Case Studies Gallery
+  ├─ Export Templates (PDF/Excel)
+  └─ Export service enhancement
+
+Week 11: Phase 5 (50 hrs)
+  ├─ Mobile optimization (touch interactions)
+  ├─ Performance (lazy loading, code splitting)
+  └─ Accessibility (WCAG AA, keyboard nav)
+
+Week 12: QA & Polish (50 hrs)
+  ├─ Cross-browser testing
+  ├─ Mobile device testing
+  ├─ Lighthouse audit (target: 85+)
+  └─ Accessibility audit (WCAG AA)
+
+---
+
+CRITICAL SUCCESS FACTORS
+========================
+
+1. Week 1-2 Refactoring (Highest Risk)
+   - Must maintain 100% backward compatibility
+   - Test each extracted module independently
+   - Mitigation: Small commits, frequent testing, parallel feature development
+
+2. State Management (Medium Risk)
+   - Scenario save/load must be bulletproof
+   - Test with 5+ concurrent scenarios
+   - Mitigation: Unit tests for StateManager, localStorage quota testing
+
+3. Visualization Library Conflicts (Medium Risk)
+   - D3 + Chart.js DOM contention (both mutate DOM)
+   - Mitigation: Isolate in separate containers, test integration early (Week 6)
+
+4. Vue.js Migration (Low Risk)
+   - Phase 4 adoption is self-contained
+   - Can skip if schedule slips (app works in vanilla)
+   - Mitigation: Build Vue components in isolation, keep vanilla fallback
+
+5. Claude API Integration (Low Risk)
+   - Rate limiting, caching strategy
+   - Mitigation: Server-side queue, localStorage cache (5-min TTL)
+
+---
+
+LIBRARY SELECTIONS
+==================
+
+Confirmed Dependencies:
+
+Core (Already have):
+  ✓ Express.js ^4.18.2
+  ✓ Tailwind CSS ^4.0.0
+
+Phase 2-3 Additions:
+  ✓ Chart.js ^4.4.0 (60KB, visualization)
+  ✓ SheetJS ^0.18.0 (150KB, Excel export)
+  ✓ jsPDF ^2.5.0 (50KB, PDF generation)
+  ✓ html2canvas ^1.4.1 (20KB, DOM → canvas)
+
+Phase 3 Addition:
+  ✓ D3.js ^7.8.0 (200KB full, 100KB tree-shaken, custom viz)
+
+Phase 4 Additions:
+  ✓ Vue.js ^3.4.0 (34KB, UI framework)
+  ✓ Pinia ^2.1.0 (15KB, state management)
+  ✓ Vite ^5.0.0 (build tool)
+  ✓ @anthropic-ai/sdk ^0.24.0 (Claude API client)
+
+Dev Dependencies (Phase 4+):
+  ⚠ @vitejs/plugin-vue ^5.0.0 (required for Vue)
+  ⚠ vitest ^1.0.0 (optional, unit testing)
+  ⚠ cypress ^13.0.0 (optional, E2E testing)
+
+Explicitly NOT Adding:
+  ✗ Redux (too much boilerplate)
+  ✗ TypeScript (10-15% overhead, not needed)
+  ✗ Material-UI (conflicts with Tailwind)
+  ✗ HighCharts (paid license)
+  ✗ Plotly.js (bloated, D3+Chart.js sufficient)
+
+---
+
+DEPLOYMENT & HOSTING
+====================
+
+Phases 1-3 (Static Hosting):
+  - Vercel, Netlify, or AWS S3 + CloudFront
+  - No build step needed
+  - Cost: ~$0/month (free tier)
+  - Deploy: Git push or manual upload of /public
+
+Phase 4+ (Node.js Hosting):
+  - Render, Railway, AWS Lambda, or Heroku
+  - Needed for /api/generate-proposal endpoint
+  - Cost: ~$7-20/month
+  - Deploy: Docker container or git-based
+
+Performance Targets (Lighthouse):
+  ✓ Performance: 85+
+  ✓ FCP: < 1.5s
+  ✓ LCP: < 2.5s
+  ✓ CLS: < 0.1
+  ✓ Core Web Vitals: All Green
+
+---
+
+RISK MITIGATION STRATEGIES
+============================
+
+Risk 1: Monolithic app.js becomes unmaintainable
+  Mitigation: Refactor into modules immediately (Week 1-2)
+
+Risk 2: State management complexity with 5+ scenarios
+  Mitigation: Custom StateManager tested with unit tests, Pinia by Phase 4
+
+Risk 3: localStorage quota exceeded
+  Mitigation: Max 5 scenarios, compression, optional backend sync (Phase 4)
+
+Risk 4: D3 + Chart.js conflicts
+  Mitigation: Separate DOM containers, test integration early (Week 6)
+
+Risk 5: Claude API rate limits
+  Mitigation: Server-side caching (5-min TTL), request queue, lower token limits
+
+Risk 6: Vue.js migration friction (Phase 4)
+  Mitigation: Build Vue in isolation, keep vanilla.js fallback until Phase 4 stable
+
+Risk 7: Mobile responsiveness issues
+  Mitigation: Test on real devices (iPhone 375px, iPad 768px) every iteration
+
+---
+
+NEXT ACTIONS
+============
+
+Immediate (This Week):
+  1. Review and confirm architectural decisions
+  2. Prepare directory structure (src/, modules/, services/, etc.)
+  3. Set up Git (if not already) with .gitignore for node_modules, .env
+  4. Review current codebase and identify refactoring boundaries
+
+Week 1-2:
+  1. Create src/core/ modules (state.js, events.js, storage.js, api.js)
+  2. Extract visualization logic → src/services/visualization.js
+  3. Create src/modules/phase1/ skeleton
+  4. Test all existing features work unchanged
+  5. Create initial documentation
+
+Week 3+:
+  1. Implement Phase 1 features (sidebar, stakeholder views, costs, mobile)
+  2. Follow weekly sprint plan (see Implementation_Roadmap.md)
+  3. Continuous testing and cross-browser validation
+  4. Weekly code reviews and performance checks
+
+---
+
+DOCUMENTS PROVIDED
+==================
+
+1. FPA_Architecture_Design.md (16 sections, comprehensive)
+   - Framework analysis, state management, deployment strategy
+   - Complete code examples for each phase
+   - Risk mitigation and testing strategies
+
+2. Implementation_Roadmap.md (12-week sprint plan)
+   - Weekly breakdown, tasks, deliverables
+   - Code volume projections
+   - Deployment checklist
+
+3. Decision_Checklist.md (15 critical decisions)
+   - Go/no-go matrix, priority ranking
+   - Secondary decisions (error handling, a11y, etc.)
+   - Next steps summary
+
+4. ARCHITECTURE_SUMMARY.txt (this file)
+   - Executive overview, quick reference
+   - File paths and directory structure
+   - Library selections and deployment options
+
+---
+
+CONCLUSION
+==========
+
+This architecture provides:
+
+✓ Minimal disruption to current codebase (Phases 1-3 stay vanilla)
+✓ Scalability for complex state management (5+ scenarios)
+✓ Flexibility to adopt frameworks when beneficial (Vue.js Phase 4)
+✓ Performance through lazy loading and code splitting
+✓ Maintainability via modular, well-organized code
+✓ Cost efficiency (no unnecessary dependencies)
+
+Recommended Timeline: 12 weeks (670 hours work, 850 hours buffer available)
+Risk Level: Low (modular refactoring, incremental adoption, proven patterns)
+Success Probability: High (clear roadmap, isolated phases, test-first approach)
+
+==============================================================================
+End of Report
+==============================================================================
